@@ -1,4 +1,6 @@
 from fastapi import FastAPI
-import pymongo
+import home
 
+app = FastAPI()
 #connections
+app.include_router(home.app, prefix="/home")
