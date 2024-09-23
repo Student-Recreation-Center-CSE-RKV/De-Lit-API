@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-import pymongo
+from home import client
 import json
 
 app = APIRouter()
