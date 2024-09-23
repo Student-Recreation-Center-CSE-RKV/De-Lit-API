@@ -3,11 +3,12 @@ import pymongo
 import json
 
 app = APIRouter()
-client = pymongo.MongoClient('mongodb://127.0.0.1:27017/')
-mydb = client['phani']
-connection = mydb.Phani
+url = "mongodb+srv://phanivutla2004:phaniphani@cluster0.gddku.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+client = pymongo.MongoClient(url, server_api=ServerApi('1'))
+mydb = client['Delit-test']
+connection = mydb.home
 
-#end
+#endpoint
 @app.get('/get_contact')
 async def get_contact():
     data = list(connection.find())
