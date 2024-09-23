@@ -4,3 +4,4 @@ import home
 app = FastAPI()
 #connections
 app.include_router(home.app, prefix="/home")
+app.include_router(magazine.app,prefix="/magazine")
