@@ -3,6 +3,7 @@ import pymongo
 import json
 from main import client
 
+app = APIRouter()
 mydb = client['Delit-test']
 connection = mydb.home
 
