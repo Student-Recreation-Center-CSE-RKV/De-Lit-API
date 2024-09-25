@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from bson import ObjectId
 from utils import client
 import datetime
-
+from typing import Optional
 
 app = APIRouter()
 mydb = client['Delit-test']
@@ -15,12 +15,13 @@ class Magazine(BaseModel):
     link : str
     description : str
     date : datetime.date
+    image : str
 
 class update(BaseModel):
-    magazine_name : str|None
-    link : str | None
-    description : str | None
-    date : datetime.date | None
+    magazine_name: Optional[str]
+    link: Optional[str]
+    description: Optional[str]
+    date: Optional[datetime.date]
 
 @app.put("/magazine_upload")
 async def post_magazine(mag:Magazine):
