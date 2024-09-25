@@ -45,4 +45,11 @@
 
 2. **Access the API**:
 
-   The server will start at `http://127.0.0.1:8000`. You can view the automatically generated interactive API docs at:
+   The server will start at `http://127.0.0.1:8000`. You can view the automatically generated interactive API docs at: `http://127.0.0.1:8000/docs`
+
+
+## Documentation
+
+You can check the clear Documentation for the APIs at [Documentation](https://github.com/Student-Recreation-Center-CSE-RKV/De-Lit-API/Documentation)
+
+- **For Blog**: [Click Here](https://github.com/Student-Recreation-Center-CSE-RKV/De-Lit-API/Documentation/blog.md)
