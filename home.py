@@ -30,9 +30,11 @@ async def get_blog():
     result =await connection.find_one({"name":"blog"})
     result["_id"] = str(result["_id"])
     return result
+
 @app.get('/get_clubtalk')
 async def get_clubtalk():
-    result =await connection.find_one({"name":"ClubTalk"})
-    if result:
-        result["_id"]=str(result["_id"])
+    result =await connection.find_one({"name":"clubtalk"})
+    for res in result:
+        if res:
+            res["_id"]=str(res["_id"])
     return result
