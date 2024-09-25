@@ -167,7 +167,3 @@ Here's the documentation for the FastAPI endpoints for the blogs page:
 3. **GET /{id}** - Retrieve a specific blog by ID.
 4. **PUT /update_blog/{id}** - Update a blog by ID.
 5. **DELETE /remove_blog/{blog_id}** - Remove a blog by ID.
-
-### Notes:
-- **Validation**: The endpoints check for valid MongoDB `ObjectId` values and handle errors like invalid IDs or missing blogs.
-- **Asynchronous**: All operations use asynchronous calls with MongoDB, which ensures non-blocking behavior, ideal for large-scale applications.
