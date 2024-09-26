@@ -50,6 +50,6 @@
 
 ## Documentation
 
-You can check the clear Documentation for the APIs at [Documentation](https://github.com/Student-Recreation-Center-CSE-RKV/De-Lit-API/Documentation)
+You can check the clear Documentation for the APIs at [Documentation](https://github.com/Student-Recreation-Center-CSE-RKV/De-Lit-API/tree/main/Documentation)
 
-- **For Blog**: [Click Here](https://github.com/Student-Recreation-Center-CSE-RKV/De-Lit-API/Documentation/blog.md)
+- **For Blog**: [Click Here](https://github.com/Student-Recreation-Center-CSE-RKV/De-Lit-API/tree/main/Documentation/blog.md)
