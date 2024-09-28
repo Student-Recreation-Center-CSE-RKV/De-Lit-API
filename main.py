@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-import home,magazine,blog
+import home,publications,blog
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo.server_api import ServerApi
 
@@ -8,5 +8,5 @@ url = "mongodb+srv://phanivutla2004:phaniphani@cluster0.gddku.mongodb.net/?retry
 client = AsyncIOMotorClient(url, server_api=ServerApi('1'))
 #connections
 app.include_router(home.app, prefix="/home")
-app.include_router(magazine.app, prefix="/magazine")
+app.include_router(publications.app, prefix="/publications")
 app.include_router(blog.app,prefix = "/blog")

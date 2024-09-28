@@ -12,16 +12,35 @@ class AllModel(BaseModel):
     content: str
     link: str
 
-#contact  endpoints
-@app.get('/get_contact')
-async def get_contact():
-    result = await connection.find_one({"name": "contact"})
-    if not result:
-        return {"error": "contact section not found"}
-    result["_id"] = str(result["_id"])
-    return result
+blocks = {"contact","about","clubtalk","blog","publications"}
 
-@app.put('/update_contact')
+@app.get("/")
+async def get_all():
+    try:
+        result = await connection.find().to_list(length=None)
+        if not result:
+            return {"error 404": "Data Not found in database"}
+        for res in result:
+            res["_id"] = str(res["_id"])
+        return result
+    except Exception as e:
+        return {"error 500":f"An unexpected error occured {e}"}
+
+@app.get("/{name}")
+async def get_data(name:str):
+    try :
+        name = name.lower()
+        if name not in blocks:
+            return {"error 404":"Invalid block accessed.Check the name correctly"}
+        result = await connection.find({"name":name})
+        if not result:
+            return {"error 404": "Data Not found in database"}
+        result["_id"] = str(result["_id"])
+        return result
+    except Exception as e:
+        return {"error 500":f"An unexpected error occured {e}"}
+
+@app.put('/block1')
 async def update_contact(data: AllModel):
     updated_data = data.dict()
     result = await connection.find_one({"name": "contact"})
@@ -32,14 +51,6 @@ async def update_contact(data: AllModel):
         await connection.insert_one(updated_data)
         return {"message": "Contact created successfully"}
 
-#magazine endpoints
-@app.get('/get_magazine')
-async def get_magazine():
-    result = await connection.find_one({"name": "magazine"})
-    if not result:
-        return {"error": "magazine section not found"}
-    result["_id"] = str(result["_id"])
-    return result
 
 @app.put('/update_magazine')
 async def update_magazine(data: AllModel):
@@ -52,15 +63,6 @@ async def update_magazine(data: AllModel):
         await connection.insert_one(updated_data)
         return {"message": "Magazine created successfully"}
 
-#about_endpoints
-@app.get('/get_about')
-async def get_about():
-    result = await connection.find_one({"name": "about"})
-    if not result:
-        return {"error": "about section not found"}
-    result["_id"] = str(result["_id"])
-    return result
-
 @app.put('/update_about')
 async def update_about(data: AllModel):
     updated_data = data.dict()
@@ -72,15 +74,6 @@ async def update_about(data: AllModel):
         await connection.insert_one(updated_data)
         return {"message": "About section created successfully"}
 
-#blog endpoints
-@app.get('/get_blog')
-async def get_blog():
-    result = await connection.find_one({"name": "blog"})
-    if not result:
-        return {"error": "blog section not found"}
-    result["_id"] = str(result["_id"])
-    return result
-
 @app.put('/update_blog')
 async def update_blog(data: AllModel):
     updated_data = data.dict()
@@ -91,15 +84,6 @@ async def update_blog(data: AllModel):
     else:
         await connection.insert_one(updated_data)
         return {"message": "Blog created successfully"}
-
-#clubtalk endpoints
-@app.get('/get_clubtalk')
-async def get_clubtalk():
-    result = await connection.find_one({"name": "clubtalk"})
-    if not result:
-        return {"error": "clubtalk section not found"}
-    result["_id"] = str(result["_id"])
-    return result
 
 @app.put('/update_clubtalk')
 async def update_clubtalk(data: AllModel):
