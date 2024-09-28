@@ -8,23 +8,24 @@ from typing import Optional
 
 app = APIRouter()
 mydb = client['Delit-test']
-mag_con = mydb.magazine
+mag_con = mydb.publication
 
-class Magazine(BaseModel):
-    magazine_name : str
+class Publication(BaseModel):
+    publication_name : str
     link : str
     description : str
+    publication_type : str
     # date : datetime.date
     # image : str
 
 class update(BaseModel):
-    magazine_name: Optional[str]
+    publication_name: Optional[str]
     link: Optional[str]
     description: Optional[str]
     # date: Optional[datetime.date]
 
-@app.put("/magazine_upload")
-async def post_magazine(mag:Magazine):
+@app.post("/")
+async def post_publication(mag:Publication):
     try:
         book=mag.model_dump()
         result = await mag_con.insert_one(book)
@@ -34,34 +35,34 @@ async def post_magazine(mag:Magazine):
     except Exception as e:
         return {"error": str(e)}
 
-@app.get("/all_mags")
-async def get_magazine():
+@app.get("/")
+async def get_publication():
     try:
         mags = []
         async for mag in mag_con.find():
             mag["_id"] = str(mag["_id"])
             mags.append(mag)
         if not mags:
-            return {"error": "No magazines found. Please upload magazines before fetching."}
+            return {"error": "No publications found. Please upload publications before fetching."}
         return mags
     except Exception as e:
         return {"error": str(e)}
 
 @app.get("/{id}")
-async def get_magazine(id:str):
+async def get_publication(id:str):
     try:
         if not ObjectId.is_valid(id):
             raise {"error":"Invalid ID format"}
-        _magazine = await mag_con.find_one({"_id":ObjectId(id)})
-        if _magazine is None:
-            raise {"status_code=404": "magazine not found"}
-        _magazine["_id"]=str(_magazine["_id"])
-        return _magazine
+        _publication = await mag_con.find_one({"_id":ObjectId(id)})
+        if _publication is None:
+            raise {"status_code=404": "publication not found"}
+        _publication["_id"]=str(_publication["_id"])
+        return _publication
     except Exception as e :
         return {"Error":str(e)}
 
-@app.put("/update_mag/{id}")
-async def update_magazine(id: str, update_data: update):
+@app.put("/{id}")
+async def update_publication(id: str, update_data: update):
     try:
         if not ObjectId.is_valid(id):
             raise {"error":"Invalid ID format"}       
@@ -75,23 +76,23 @@ async def update_magazine(id: str, update_data: update):
             {"$set": update_data}
         )
         if result.modified_count == 0:
-            return {"error": "No magazine found with the given ID or no changes made"}
-        return {"success": "Magazine updated successfully"}
+            return {"error": "No publication found with the given ID or no changes made"}
+        return {"success": "publication updated successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
     
-@app.delete("/remove_magazine/{magazine_id}")
-async def remove_magazine(magazine_id:str):
+@app.delete("/{id}")
+async def remove_publication(id:str):
     try:
-        if not ObjectId.is_valid(magazine_id):
-            raise {"error" :"Invalid magazine ID format"}
-        magazine = await mag_con.find_one({"_id": ObjectId(magazine_id)})
-        if not magazine:
-            raise HTTPException(status_code=404, detail="Magazine not found")
-        delete_result = await mag_con.delete_one({"_id": ObjectId(magazine_id)})
+        if not ObjectId.is_valid(id):
+            raise {"error" :"Invalid publication ID format"}
+        publication = await mag_con.find_one({"_id": ObjectId(id)})
+        if not publication:
+            raise HTTPException(status_code=404, detail="publication not found")
+        delete_result = await mag_con.delete_one({"_id": ObjectId(id)})
         if delete_result.deleted_count == 1:
-            return {"Success": f"Magazine with id {magazine_id} is successfully deleted"}
+            return {"Success": f"publication with id {id} is successfully deleted"}
         else:
-            raise HTTPException(status_code=500, detail="Failed to delete the magazine")
+            raise HTTPException(status_code=500, detail="Failed to delete the publication")
     except Exception as e:
         raise {"status_code=500": str(e)}
