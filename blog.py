@@ -26,7 +26,7 @@ class update(BaseModel):
 
 
 #To upload the blog to database
-@app.put("/blog_upload")
+@app.post("/")
 async def post_blog(blog:blog):
     try:
         blog=blog.model_dump()
@@ -37,9 +37,8 @@ async def post_blog(blog:blog):
     except Exception as e:
         return {"error": str(e)}
 
-
 #To get all blogs
-@app.get("/all_blogs")
+@app.get("/")
 async def get_blogs():
     try:
         blogs = []
@@ -47,7 +46,7 @@ async def get_blogs():
             blog["_id"] = str(blog["_id"])
             blogs.append(blog)
         if not blogs:
-            return {"error": "No blogs found. Please upload blogs before fetching."}
+            return {"error 404": "No blogs found. Please upload blogs before fetching."}
         return blogs
     except Exception as e:
         return {"error": str(e)}
@@ -69,7 +68,7 @@ async def get_blog(id:str):
 
 
 #To update the blog
-@app.put("/update_blog/{id}")
+@app.put("/{id}")
 async def update_blog(id: str, update_data: update):
     try:
         if not ObjectId.is_valid(id):
@@ -90,7 +89,7 @@ async def update_blog(id: str, update_data: update):
         raise {"status_code=500": f"An error occurred: {str(e)}"}
     
 #To remove specific blog with id
-@app.delete("/remove_blog/{blog_id}")
+@app.delete("/{blog_id}")
 async def remove_blog(blog_id:str):
     try:
         if not ObjectId.is_valid(blog_id):
@@ -104,4 +103,4 @@ async def remove_blog(blog_id:str):
         else:
             raise HTTPException(status_code=500, detail="Failed to delete the blog")
     except Exception as e:
-        raise {"status_code=500": str(e)}
+        return {"status_code=500": str(e)}

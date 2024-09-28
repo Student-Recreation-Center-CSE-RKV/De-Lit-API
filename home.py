@@ -12,8 +12,20 @@ class AllModel(BaseModel):
     content: str
     link: str
 
+@app.get("/")
+async def get_all():
+    try:
+        result = await connection.find().to_list(length=None)
+        if not result:
+            return {"error 404": "Data Not found in database"}
+        for res in result:
+            res["_id"] = str(res["_id"])
+        return result
+    except Exception as e:
+        return {"error 500":f"An unexpected error occured {e}"}
+
 #contact  endpoints
-@app.get('/get_contact')
+@app.get('/block1')
 async def get_contact():
     result = await connection.find_one({"name": "contact"})
     if not result:
@@ -21,7 +33,7 @@ async def get_contact():
     result["_id"] = str(result["_id"])
     return result
 
-@app.put('/update_contact')
+@app.put('/block1')
 async def update_contact(data: AllModel):
     updated_data = data.dict()
     result = await connection.find_one({"name": "contact"})
