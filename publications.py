@@ -27,13 +27,15 @@ class update(BaseModel):
 @app.post("/")
 async def post_publication(mag:Publication):
     try:
-        book=mag.model_dump()
+        book = mag.model_dump()
         result = await mag_con.insert_one(book)
         if result.inserted_id:
             book["_id"] = str(result.inserted_id)
             return book
+        else :
+            raise HTTPException(status_code = 400 , detail = f"Can't upload the data into Database")
     except Exception as e:
-        return {"error": str(e)}
+        raise HTTPException(status_code = 500 , detail = f"An unknown error occurred. {str(object=e)}")
 
 @app.get("/")
 async def get_publication():

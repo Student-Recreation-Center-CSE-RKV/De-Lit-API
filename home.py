@@ -1,6 +1,7 @@
-from fastapi import APIRouter
+from fastapi import APIRouter,HTTPException
 from pydantic import BaseModel
 from utils import client
+from functools import wraps
 
 app = APIRouter()
 mydb = client['Delit-test']
@@ -14,17 +15,32 @@ class AllModel(BaseModel):
 
 blocks = {"contact","about","clubtalk","blog","publications"}
 
+# This wrapper function to implement DRY principle to handle try-except block.
+def handle_exception(function):
+    @wraps(function)
+    async def wrapper(*arguments , **kwargs):
+        try:
+            return await function(*arguments , **kwargs)
+        except HTTPException as http_exce:
+            raise http_exce
+        except Exception as e:
+            raise HTTPException(status_code = 500, detail = f"An unknown error occurred.{str(e)}")
+
 @app.get("/")
+@handle_exception
+# This function is to get data for all 4 blocks in home page.
+# The output for this function is a list of objects of data.
+# All Objects contain same type of response : (
+# name : name of the block ,
+# content : A description of each block,
+# link : link of image to be displayed )
 async def get_all():
-    try:
-        result = await connection.find().to_list(length=None)
-        if not result:
-            return {"error 404": "Data Not found in database"}
-        for res in result:
-            res["_id"] = str(res["_id"])
-        return result
-    except Exception as e:
-        return {"error 500":f"An unexpected error occured {e}"}
+    result = await connection.find().to_list(length=None)
+    if not result:
+        raise HTTPException(status_code = 404, detail = "Data Not found in database")
+    for res in result:
+        res["_id"] = str(res["_id"])
+    return result
 
 @app.get("/{name}")
 async def get_data(name:str):
