@@ -17,6 +17,7 @@ class blog(BaseModel):
     link: str
     content: str
     overview: str
+    created_at: datetime.datetime = datetime.datetime.now()
 
 
 class update(BaseModel):
@@ -57,6 +58,7 @@ async def upload_blog(blog: blog) -> blog:
             "link": "string",
             "content": "string",
             "overview": "string"
+            "created_at": "datetime"(automatically added at the time of uploading)
         }
 
     Returns:
@@ -66,6 +68,7 @@ async def upload_blog(blog: blog) -> blog:
     - HTTPException: If there is an error while uploading the blog.
     """
     blog = blog.model_dump()
+    blog["created_at"] = datetime.datetime.now()
     result = await blog_con.insert_one(blog)
     if result.inserted_id:
         blog["_id"] = str(result.inserted_id)
@@ -89,7 +92,7 @@ async def get_blogs():
     """
 
     blogs = []
-    async for blog in blog_con.find():
+    async for blog in blog_con.find().sort("created_at", -1):
         blog["_id"] = str(blog["_id"])
         blogs.append(blog)
     if not blogs:
