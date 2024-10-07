@@ -1,4 +1,4 @@
-from fastapi import APIRouter,HTTPException
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from utils import client
 from functools import wraps
@@ -7,24 +7,33 @@ app = APIRouter()
 mydb = client['Delit-test']
 connection = mydb.home
 
-#pydantic model
+# pydantic model
+
+
 class AllModel(BaseModel):
     name: str
     content: str
     link: str
 
-blocks = {"contact","about","clubtalk","blog","publications"}
+
+blocks = {"contact", "about", "clubtalk", "blog", "publications"}
 
 # This wrapper function to implement DRY principle to handle try-except block.
+
+
 def handle_exception(function):
     @wraps(function)
-    async def wrapper(*arguments , **kwargs):
+    async def wrapper(*arguments, **kwargs):
         try:
-            return await function(*arguments , **kwargs)
+            return await function(*arguments, **kwargs)
         except HTTPException as http_exce:
             raise http_exce
         except Exception as e:
-            raise HTTPException(status_code = 500, detail = f"An unknown error occurred.{str(e)}")
+            raise HTTPException(
+                status_code=500, detail=f"An unknown error occurred.{str(e)}")
+
+    return wrapper
+
 
 @app.get("/")
 @handle_exception
@@ -44,14 +53,16 @@ async def get_all_blocks() -> list:
     """
     result = await connection.find().to_list(length=None)
     if not result:
-        raise HTTPException(status_code=404, detail="Data Not found in the database")
+        raise HTTPException(
+            status_code=404, detail="Data Not found in the database")
     # Convert MongoDB ObjectId to string.
     for res in result:
         res["_id"] = str(res["_id"])
     return result
 
+
 @app.get("/{name}")
-@hande_exception
+@handle_exception
 async def get_block_data(name: str) -> dict:
     """
     Retrieve data for a specific block by name.
@@ -60,25 +71,28 @@ async def get_block_data(name: str) -> dict:
     and then retrieves the corresponding data from the database.
     If the block is invalid or not found in the database, an appropriate HTTPException is raised.
 
-    Arguments:
+    Args:
         name (str): The name of the block to retrieve.
 
     Returns:
         dict: A dictionary containing the block's data (name, content, and image link).
-    
+
     Raises:
         HTTPException: If the block name is invalid or the data is not found in the database.
     """
     name = name.lower()
     # Check if the block name is valid or not by comparing it against the blocks set.
     if name not in blocks:
-        raise HTTPException(status_code=404, detail="Invalid block accessed. Check the name correctly.")
+        raise HTTPException(
+            status_code=404, detail="Invalid block accessed. Check the name correctly.")
     result = await connection.find_one({"name": name})
     if not result:
-        raise HTTPException(status_code=404, detail="Data not found in the database.")
+        raise HTTPException(
+            status_code=404, detail="Data not found in the database.")
     # Convert the MongoDB ObjectId to a string
     result["_id"] = str(result["_id"])
     return result
+
 
 @app.put('/block1')
 async def update_contact(data: AllModel):
@@ -103,6 +117,7 @@ async def update_magazine(data: AllModel):
         await connection.insert_one(updated_data)
         return {"message": "Magazine created successfully"}
 
+
 @app.put('/update_about')
 async def update_about(data: AllModel):
     updated_data = data.dict()
@@ -114,6 +129,7 @@ async def update_about(data: AllModel):
         await connection.insert_one(updated_data)
         return {"message": "About section created successfully"}
 
+
 @app.put('/update_blog')
 async def update_blog(data: AllModel):
     updated_data = data.dict()
@@ -124,6 +140,7 @@ async def update_blog(data: AllModel):
     else:
         await connection.insert_one(updated_data)
         return {"message": "Blog created successfully"}
+
 
 @app.put('/update_clubtalk')
 async def update_clubtalk(data: AllModel):
