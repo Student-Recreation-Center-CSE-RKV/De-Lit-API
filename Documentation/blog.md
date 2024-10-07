@@ -1,158 +1,163 @@
-# FastAPI Blog API Documentation
+# Blog API Documentation
 
-This document provides an overview of the FastAPI application endpoints for managing blogs. The API allows users to upload, retrieve, update, and delete blog entries. 
+## Introduction
+This API allows users to upload, retrieve, update, and delete blog entries in the **Delit-test** MongoDB database. Each blog entry consists of the author's name, blog title, link, content, an overview, and a timestamp for when the blog was created.
 
-> **Note:** The `link` field in each blog entry represents the **contact link for the author**.
+The API uses **FastAPI** for handling HTTP requests and **Pydantic** for data validation. MongoDB's `ObjectId` is used to uniquely identify each blog entry.
 
-## Base URL
+## API Endpoints
 
-The API can be accessed via the following base URL:
-```
-http://localhost:8000/blog/
-```
-
----
-
-## Endpoints Overview
-
-### 1. **Upload Blog**: `PUT /blog_upload`
-- **Description**: Upload a new blog to the database.
-- **Request Body**:
-  - `author` (string, required): The author of the blog.
-  - `blog_name` (string, required): The name of the blog.
-  - `link` (string, required): The contact link for the author.
-  - `content` (string, required): The content of the blog.
-  - `overview` (string, required): A brief overview of the blog.
+### 1. Upload Blog Entry
+- **Method**: `POST`
+- **Endpoint**: `/blog`
+- **Description**: Upload a new blog entry to the database.
+- **Request Body**: 
+  ```json
+  {
+    "author": "string",
+    "blog_name": "string",
+    "link": "string",
+    "content": "string",
+    "overview": "string"
+  }
+  ```
+  > The `created_at` field is automatically generated upon blog creation.
 - **Response**:
-  - On success: Returns the blog with the newly created `_id`.
-  - On failure: Returns an error message.
-- **Example**:
-  - **Request**:
-    ```json
-    {
-      "author": "Phani",
-      "blog_name": "How to Master CP",
-      "link": "test_link",
-      "content": "Lorem",
-      "overview": "Lorem"
-    }
-    ```
-  - **Response** (success):
-    ```json
-    {
-      "_id": "615f77c3f50b7b0a2b9e4f15",
-      "author": "Phani",
-      "blog_name": "How to Master CP",
-      "link": "test_link",
-      "content": "Lorem",
-      "overview": "Lorem"
-    }
-    ```
+  ```json
+  {
+    "_id": "67037455bd41e77da7f836b7",
+    "author": "De-lit Admin",
+    "blog_name": "Broken piece of heart",
+    "link": "https://test.link",
+    "content": "test data",
+    "overview": "overview",
+    "created_at": "2024-10-07T11:10:37.674000"
+  }
+  ```
+- **Error Codes**:
+  - `400`: Blog could not be uploaded to the database.
+  - `500`: An unknown error occurred.
 
----
-
-### 2. **Get All Blogs**: `GET /all_blogs`
-- **Description**: Retrieve all blogs from the database.
+### 2. Retrieve All Blogs
+- **Method**: `GET`
+- **Endpoint**: `/blog`
+- **Description**: Fetch all blog entries from the database, sorted by creation date (latest first).
 - **Response**:
-  - On success: Returns a list of all blogs with their respective fields.
-  - On failure or no blogs: Returns an error message.
-- **Example**:
-  - **Response** (success):
-    ```json
-    [
-      {
-        "_id": "615f77c3f50b7b0a2b9e4f15",
-        "author": "Phani",
-        "blog_name": "How to Master CP",
-        "link": "test_link",
-        "content": "Lorem",
-        "overview": "Lorem"
-      }
-    ]
-    ```
+  ```json
+  [
+    {
+      "_id": "67037455bd41e77da7f836b7",
+      "author": "De-lit Admin",
+      "blog_name": "Broken piece of heart",
+      "link": "https://test.link",
+      "content": "test data",
+      "overview": "overview",
+      "created_at": "2024-10-07T11:10:37.674000"
+    }
+  ]
+  ```
+- **Error Codes**:
+  - `404`: No blogs found in the database.
+  - `500`: An unknown error occurred.
 
----
-
-### 3. **Get Blog by ID**: `GET /{id}`
-- **Description**: Retrieve a specific blog by its ID.
-- **Path Parameter**:
-  - `id` (string, required): The unique MongoDB ObjectID of the blog.
+### 3. Retrieve a Single Blog by ID
+- **Method**: `GET`
+- **Endpoint**: `/blog/{id}`
+- **Description**: Retrieve a specific blog entry by its unique MongoDB `ObjectId`.
+- **Request Parameters**:
+  - `id`: The `ObjectId` of the blog you want to retrieve.
 - **Response**:
-  - On success: Returns the blog with the specified ID.
-  - On failure: Returns an error message (invalid ID, blog not found).
-- **Example**:
-  - **Request**: `GET /615f77c3f50b7b0a2b9e4f15`
-  - **Response** (success):
-    ```json
-    {
-      "_id": "615f77c3f50b7b0a2b9e4f15",
-      "author": "Phani",
-      "blog_name": "How to Master CP",
-      "link": "test_link",
-      "content": "Lorem",
-      "overview": "Lorem"
-    }
-    ```
+  ```json
+  {
+    "_id": "67037455bd41e77da7f836b7",
+    "author": "De-lit Admin",
+    "blog_name": "Broken piece of heart",
+    "link": "https://test.link",
+    "content": "test data",
+    "overview": "overview",
+    "created_at": "2024-10-07T11:10:37.674000"
+  }
+  ```
+- **Error Codes**:
+  - `404`: Invalid blog ID format or blog not found.
+  - `500`: An unknown error occurred.
 
----
-
-### 4. **Update Blog**: `PUT /update_blog/{id}`
-- **Description**: Update a blog's details by its ID.
-- **Path Parameter**:
-  - `id` (string, required): The unique MongoDB ObjectID of the blog to be updated.
-- **Request Body**:
-  - The fields that can be updated are optional:
-    - `author` (string, optional): New author of the blog.
-    - `blog_name` (string, optional): New blog name.
-    - `link` (string, optional): New contact link for the author.
-    - `content` (string, optional): New content of the blog.
-    - `overview` (string, optional): New overview of the blog.
+### 4. Update Blog by ID
+- **Method**: `PUT`
+- **Endpoint**: `/blog/{id}`
+- **Description**: Update a specific blog entry by its `ObjectId`. Only the provided fields will be updated; other fields will remain unchanged.
+- **Request Parameters**:
+  - `id`: The `ObjectId` of the blog to update.
+- **Request Body** (Optional fields):
+  ```json
+  {
+    "author": "string",
+    "blog_name": "string",
+    "link": "string",
+    "content": "string",
+    "overview": "string"
+  }
+  ```
 - **Response**:
-  - On success: Returns a success message indicating the blog was updated.
-  - On failure: Returns an error message (invalid ID, no blog found, no data to update).
-- **Example**:
-  - **Request**:
-    ```json
-    {
-      "author": "Jane Doe",
-      "blog_name": "Updated Blog Name"
-    }
-    ```
-  - **Response** (success):
-    ```json
-    {
-      "success": "Blog updated successfully"
-    }
-    ```
+  - `200`: Blog updated successfully.
+- **Error Codes**:
+  - `400`: No data provided for update.
+  - `404`: Invalid blog ID format or blog not found.
+  - `500`: An unknown error occurred.
 
----
-
-### 5. **Delete Blog**: `DELETE /remove_blog/{blog_id}`
-- **Description**: Remove a specific blog by its ID.
-- **Path Parameter**:
-  - `blog_id` (string, required): The unique MongoDB ObjectID of the blog to be deleted.
+### 5. Delete Blog by ID
+- **Method**: `DELETE`
+- **Endpoint**: `/blog/{blog_id}`
+- **Description**: Delete a specific blog by its `ObjectId`.
+- **Request Parameters**:
+  - `blog_id`: The `ObjectId` of the blog to delete.
 - **Response**:
-  - On success: Returns a success message indicating the blog was deleted.
-  - On failure: Returns an error message (invalid ID, blog not found, deletion failed).
-- **Example**:
-  - **Request**: `DELETE /remove_blog/615f77c3f50b7b0a2b9e4f15`
-  - **Response** (success):
-    ```json
-    {
-      "Success": "Blog with id 615f77c3f50b7b0a2b9e4f15 is successfully deleted"
-    }
-    ```
+  - `200`: Blog successfully deleted.
+- **Error Codes**:
+  - `404`: Invalid blog ID format or blog not found.
+  - `500`: Failed to delete the blog or an unknown error occurred.
 
----
+## Usage Example
+
+1. **POST Request Example**:
+   ```json
+   {
+     "author": "De-lit Admin",
+     "blog_name": "Broken piece of heart",
+     "link": "https://test.link",
+     "content": "test data",
+     "overview": "overview"
+   }
+   ```
+   Response:
+   ```json
+   {
+     "_id": "67037455bd41e77da7f836b7",
+     "author": "De-lit Admin",
+     "blog_name": "Broken piece of heart",
+     "link": "https://test.link",
+     "content": "test data",
+     "overview": "overview",
+     "created_at": "2024-10-07T11:10:37.674000"
+   }
+   ```
+
+## Access
+This blog is available at the following endpoint:
+
+**Base URL**: `localhost:8000`
+- **Endpoint**: `/blog` 
+
+## Error Handling
+
+All endpoints are wrapped with an exception handler to manage known and unknown errors. If an unexpected error occurs, the system will return a 500 status code with a descriptive error message.
 
 ### Summary of Endpoints:
 
-1. **PUT /blog_upload** - Upload a new blog.
-2. **GET /all_blogs** - Retrieve all blogs.
-3. **GET /{id}** - Retrieve a specific blog by ID.
-4. **PUT /update_blog/{id}** - Update a blog by ID.
-5. **DELETE /remove_blog/{blog_id}** - Remove a blog by ID.
-
----
+1. **PUT /** - Upload a new blog.
+2. **GET /** - Retrieve all blogs.
+3. **GET /{blog_id}** - Retrieve a specific blog by ID.
+4. **PUT /{blog_id}** - Update a blog by ID.
+5. **DELETE /{blog_id}** - Remove a blog by ID.
 
 > **Note**: The `link` field in each blog entry refers to the **contact link for the author**.
