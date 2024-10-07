@@ -50,6 +50,14 @@ async def upload_blog(blog: blog) -> blog:
 
     Args:
     - blog (blog): Pydantic model of the blog to be uploaded.
+    Structure of blog:
+        {
+            "author": "string",
+            "blog_name": "string",
+            "link": "string",
+            "content": "string",
+            "overview": "string"
+        }
 
     Returns:
     - blog (dict): The uploaded blog with an additional "_id" field containing the MongoDB ObjectId of the blog.
@@ -182,8 +190,8 @@ async def remove_blog(blog_id: str):
         raise HTTPException(status_code=404, detail="blog not found")
     delete_result = await blog_con.delete_one({"_id": ObjectId(blog_id)})
     if delete_result.deleted_count == 1:
-        raise HTTPException(status_code=200, detail=f"blog with id {
-                            blog_id} is successfully deleted")
+        raise HTTPException(status_code=200,
+                            detail=f"blog with id {blog_id} is successfully deleted")
     else:
         raise HTTPException(
             status_code=500, detail="Failed to delete the blog")
