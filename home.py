@@ -1,11 +1,14 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException,File,UploadFile,Form
 from pydantic import BaseModel
 from utils import client
 from functools import wraps
+from motor.motor_asyncio import AsyncIOMotorGridFSBucket
+from bson import ObjectId
 
 app = APIRouter()
 mydb = client['Delit-test']
 connection = mydb.home
+fs=AsyncIOMotorGridFSBucket(mydb)
 
 # pydantic model
 
@@ -152,3 +155,29 @@ async def update_clubtalk(data: AllModel):
     else:
         await connection.insert_one(updated_data)
         return {"message": "Clubtalk created successfully"}
+    
+@app.put("/update_banner")
+@handle_exception
+async def update_banner(file:UploadFile=File(...)):
+    """
+    Updates the HomeBanner:
+        This function is used to update the Banner in the home page in regular intervals,
+        Here the image is uploaded from the user and the image is converted in string and stored in the database.
+    """
+   
+    # reads the uploaded file
+    file_content=await file.read()
+
+    #stores the uploaded file in the database
+    grid_in=fs.open_upload_stream(filename=file.filename)
+
+    #writes the content in the file into chunks
+    await grid_in.write(file_content)
+
+    #Finalizes the file by closing
+    await grid_in.close()
+    #File Id
+    file_id=grid_in._id  
+   
+    return{"message":"File Uploaded successfully","_id":str(file_id)} 
+
