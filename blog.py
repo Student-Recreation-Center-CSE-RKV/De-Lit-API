@@ -48,9 +48,6 @@ def handle_exception(function):
 async def upload_blog(blog: blog) -> blog:
     """
     Upload a blog to the database.
-
-    Args:
-    - blog (blog): Pydantic model of the blog to be uploaded.
     Structure of blog:
         {
             "author": "string",
@@ -60,6 +57,9 @@ async def upload_blog(blog: blog) -> blog:
             "overview": "string"
             "created_at": "datetime"(automatically added at the time of uploading)
         }
+
+    Args:
+    - blog (blog): Pydantic model of the blog to be uploaded.
 
     Returns:
     - blog (dict): The uploaded blog with an additional "_id" field containing the MongoDB ObjectId of the blog.

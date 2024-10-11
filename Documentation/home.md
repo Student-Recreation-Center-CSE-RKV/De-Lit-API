@@ -1,126 +1,187 @@
 
-# API Documentation for home page get and update endpoints
+# **Block Management API Documentation**
 
-This document provides a comprehensive overview of the FastAPI application endpoints that manage various content sections in a database. Each section can be retrieved and updated through specific endpoints.
+**Base URL**: `http://localhost:8000/home`
 
-## Base URL
-
-The API can be accessed via the following base URL: 
-```
-http://localhost:8000/home/
-```
-
-## Endpoints Overview
-
-### 1. Retrieve Content Section
-
-- **Endpoint**: `/get_{section}`
-- **Method**: `GET`
-- **Description**: Fetches the content of the specified section (e.g., contact, magazine, about, blog, clubtalk).
-  
-#### Request Parameters
-
-- **section**: The name of the section you want to retrieve (e.g., `contact`, `magazine`, etc.).
-
-#### Response Format
-
-- **Success Response**:
-  ```json
-  {
-    "_id": "unique_id",
-    "name": "{section_name}",
-    "content": "{content_text}",
-    "link": "{link_url}"
-  }
-  ```
-
-- **Error Response**:
-  If the section does not exist:
-  ```json
-  {
-    "error": "{section_name} section not found"
-  }
-  ```
-
-### Example: Get Magazine Section
-
-- **Endpoint**: `/get_magazine`
-- **Full URL**: `http://localhost:8000/home/get_magazine`
-- **Response**:
-  - **Success**:
-    ```json
-    {
-      "_id": "unique_id",
-      "name": "magazine",
-      "content": "Lorem ipsum",
-      "link": "https://raw.githubusercontent.com/venkataPhanindraVutla/Demo-Names/blob/main/sample.jpg"
-    }
-    ```
-  - **Error**:
-    ```json
-    {
-      "error": "magazine section not found"
-    }
-    ```
-
-### 2. Update Content Section
-
-- **Endpoint**: `/update_{section}`
-- **Method**: `PUT`
-- **Description**: Updates the content of the specified section. If the section does not exist, it creates a new one.
-
-#### Request Body
-
-- **Content-Type**: `application/json`
-- **Schema**:
-  ```json
-  {
-    "name": "{section_name}",
-    "content": "{content_text}",
-    "link": "{link_url}"
-  }
-  ```
-
-#### Response Format
-
-- **Success Response**:
-  - If updated:
-    ```json
-    {
-      "message": "{section_name} updated successfully"
-    }
-    ```
-  - If created:
-    ```json
-    {
-      "message": "{section_name} created successfully"
-    }
-    ```
-
-### Example: Update Magazine Section
-
-- **Endpoint**: `/update_magazine`
-- **Full URL**: `http://localhost:8000/home/update_magazine`
-- **Request Body**:
-  ```json
-  {
-    "name": "magazine",
-    "content": "Lorem ipsum",
-    "link": "https://raw.githubusercontent.com/venkataPhanindraVutla/Demo-Names/blob/main/sample.jpg"
-  }
-  ```
-- **Response**:
-  - **Success**:
-    ```json
-    {
-      "message": "Magazine updated successfully"
-    }
-    ```
-    or
-    ```json
-    {
-      "message": "Magazine created successfully"
-    }
-    ```
+This API allows you to manage content blocks on the homepage. Each block is associated with three primary attributes:
+- `name`: The unique identifier for the block.
+- `content`: The content or description related to the block.
+- `image_link`: A URL pointing to an image related to the block.
 
 ---
+
+## **Blocks Overview**
+
+The available blocks in the system include:
+- **contact**: Block for contact-related information.
+- **about**: Block for information about the organization or project.
+- **clubtalk**: Block for discussions and club activities.
+- **blog**: Block for blog content.
+- **publications**: Block for publications and magazine-related content.
+
+---
+
+## **Endpoints**
+
+### 1. **Retrieve All Blocks**
+
+**`GET /home/`**
+
+**Description**: This endpoint retrieves a list of all blocks available in the database.
+
+#### **Response**
+
+- **200 OK**: Returns a list of all blocks, each containing:
+  - `_id`: MongoDB's ObjectId (converted to a string).
+  - `name`: Name of the block.
+  - `content`: The block's content description.
+  - `image_link`: URL of the image related to the block.
+
+##### **Response Example**
+```json
+[
+  {
+    "_id": "608c5d3f1c4e88b4f070c123",
+    "name": "about",
+    "content": "This is content for the about block.",
+    "image_link": "https://test.link.about"
+  },
+  {
+    "_id": "608c5d3f1c4e88b4f070c456",
+    "name": "blog",
+    "content": "This is content for the blog block.",
+    "image_link": "https://test.link.blog"
+  }
+]
+```
+
+#### **Error Responses**
+- **404 Not Found**: If no blocks are found in the database.
+  ```json
+  {
+    "detail": "Data Not found in the database"
+  }
+  ```
+
+---
+
+### 2. **Retrieve Block by Name**
+
+**`GET /home/{name}`**
+
+**Description**: Retrieves the data for a specific block by name.
+
+#### **Path Parameter**
+- `name` (string): The name of the block to retrieve (e.g., "about", "blog", "clubtalk"). This is case-insensitive.
+
+#### **Response**
+
+- **200 OK**: Returns the block data including:
+  - `_id`: MongoDB's ObjectId (converted to a string).
+  - `name`: Name of the block.
+  - `content`: The block's content description.
+  - `image_link`: URL of the image related to the block.
+
+##### **Response Example**
+```json
+{
+  "_id": "608c5d3f1c4e88b4f070c123",
+  "name": "about",
+  "content": "This is content for the about block.",
+  "image_link": "https://test.link.about"
+}
+```
+
+#### **Error Responses**
+- **404 Not Found**: If the block name provided is invalid (not part of the predefined blocks list).
+  ```json
+  {
+    "detail": "Invalid block accessed. Check the name correctly."
+  }
+  ```
+- **404 Not Found**: If the block name is valid but no data is found in the database for that block.
+  ```json
+  {
+    "detail": "Data not found in the database."
+  }
+  ```
+
+---
+
+### 3. **Update Block**
+
+**`PUT /home/{block_name}`**
+
+**Description**: Updates the data for a specific block by its name.
+
+#### **Path Parameter**
+- `block_name` (string): The name of the block to update. This is case-insensitive.
+
+#### **Request Body**
+- A valid JSON object that includes:
+  - `name`: The name of the block.
+  - `content`: The updated content for the block.
+  - `image_link`: The updated URL of the image for the block.
+
+##### **Request Example**
+```json
+{
+  "name": "about",
+  "content": "Updated content for the about block.",
+  "image_link": "https://test.link.newabout"
+}
+```
+
+#### **Response**
+- **200 OK**: Returns a message indicating the block has been updated successfully.
+  ```json
+  {
+    "message": "Block updated successfully"
+  }
+  ```
+
+#### **Error Responses**
+- **404 Not Found**: If the block name provided is invalid (not part of the predefined blocks list).
+  ```json
+  {
+    "detail": "Invalid block accessed. Check the name correctly."
+  }
+  ```
+- **404 Not Found**: If the block name is valid, but no data is found in the database for that block.
+  ```json
+  {
+    "detail": "Data not found in the database."
+  }
+  ```
+
+---
+
+## **Error and Success Handling**
+
+- **500 Internal Server Error**: A custom exception handler ensures that any unhandled exceptions return a generic error message. This applies across all routes.
+
+  ```json
+  {
+    "detail": "An unknown error occurred. <error_message>"
+  }
+  ```
+
+- **200 OK**: For successful requests, the appropriate data or success message is returned, as seen in the responses for each endpoint.
+
+---
+
+## **Notes**
+
+- **MongoDB ObjectId**: The `_id` field is automatically generated by MongoDB and is converted to a string for JSON serialization.
+- **Case Insensitivity**: Block names passed in the path parameters are handled in a case-insensitive manner.
+- **Predefined Block Names**: Ensure that block names passed in requests belong to the predefined set: `contact`, `about`, `clubtalk`, `blog`, `publications`.
+
+---
+
+## **Status Codes**
+
+Here’s a summary of all status codes returned by the API:
+
+- **200 OK**: Successful retrieval or update.
+- **404 Not Found**: Data is not found (either due to invalid block name or empty database).
+- **500 Internal Server Error**: A server-side error occurs that is not handled by the logic.
