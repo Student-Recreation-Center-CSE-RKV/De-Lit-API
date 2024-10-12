@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-import home,publications,blog,banner
+import Routes.home as home,Routes.publications as publications,Routes.blog as blog,Routes.banner as banner
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo.server_api import ServerApi
 

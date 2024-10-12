@@ -48,6 +48,7 @@ def handle_exception(function):
 async def upload_blog(blog: blog) -> blog:
     """
     Upload a blog to the database.
+    
     Structure of blog:
         {
             "author": "string",

@@ -1,4 +1,4 @@
-from fastapi import APIRouter,HTTPException
+from fastapi import APIRouter, HTTPException
 import json
 from pydantic import BaseModel
 from bson import ObjectId
@@ -11,13 +11,15 @@ app = APIRouter()
 mydb = client['Delit-test']
 mag_con = mydb.publication
 
+
 class Publication(BaseModel):
-    publication_name : str
-    link : str
-    description : str
-    publication_type : str
-    img_link : str
+    publication_name: str
+    link: str
+    description: str
+    publication_type: str
+    img_link: str
     created_at: datetime.datetime = datetime.datetime.now()
+
 
 class update(BaseModel):
     publication_name: Optional[str]
@@ -27,6 +29,8 @@ class update(BaseModel):
     img_link: Optional[str]
 
 # This wrapper function to implement DRY principle to handle try-except block.
+
+
 def handle_exception(function):
     @wraps(function)
     async def wrapper(*arguments, **kwargs):
@@ -40,9 +44,10 @@ def handle_exception(function):
 
     return wrapper
 
+
 @app.post("/")
 @handle_exception
-async def post_publication(mag:Publication):
+async def post_publication(mag: Publication):
     """
     Uploads a publication to the database.
 
@@ -61,8 +66,10 @@ async def post_publication(mag:Publication):
     if result.inserted_id:
         publication["_id"] = str(result.inserted_id)
         return publication
-    else :
-        raise HTTPException(status_code = 400 , detail = f"Can't upload the data into Database")
+    else:
+        raise HTTPException(
+            status_code=400, detail=f"Can't upload the data into Database")
+
 
 @app.get("/")
 @handle_exception
@@ -81,12 +88,14 @@ async def get_publication():
         mag["_id"] = str(mag["_id"])
         mags.append(mag)
     if not mags:
-        raise HTTPException(status_code=404, detail="No publications found. Please upload publications before fetching.")
+        raise HTTPException(
+            status_code=404, detail="No publications found. Please upload publications before fetching.")
     return mags
+
 
 @app.get("/{id}")
 @handle_exception
-async def get_publication(id:str):
+async def get_publication(id: str):
     """
     Retrieve a specific publication by its unique MongoDB ObjectId.
 
@@ -100,12 +109,14 @@ async def get_publication(id:str):
     - HTTPException: If the id is invalid, the publication is not found, or the retrieval is not successful.
     """
     if not ObjectId.is_valid(id):
-        raise HTTPException(status_code=404, detail="Invalid publication ID format")
-    _publication = await mag_con.find_one({"_id":ObjectId(id)})
+        raise HTTPException(
+            status_code=404, detail="Invalid publication ID format")
+    _publication = await mag_con.find_one({"_id": ObjectId(id)})
     if _publication is None:
         raise HTTPException(status_code=404, detail="publication not found")
-    _publication["_id"]=str(_publication["_id"])
+    _publication["_id"] = str(_publication["_id"])
     return _publication
+
 
 @app.put("/{id}")
 @handle_exception
@@ -126,23 +137,28 @@ async def update_publication(id: str, update_data: update):
     - HTTPException: If the id is invalid, the publication is not found, or no data is provided for update.
     """
     if not ObjectId.is_valid(id):
-        raise HTTPException(status_code=404, detail="Invalid publication ID format")
-    update_data = {k: v for k, v in update_data.dict().items() if v is not None}
+        raise HTTPException(
+            status_code=404, detail="Invalid publication ID format")
+    update_data = {k: v for k, v in update_data.dict().items()
+                   if v is not None}
 
     if not update_data:
-        raise HTTPException(status_code=400, detail="No data provided for update")
+        raise HTTPException(
+            status_code=400, detail="No data provided for update")
     result = await mag_con.update_one(
         {"_id": ObjectId(id)},
         {"$set": update_data}
     )
     if result.modified_count == 0:
-        raise HTTPException(status_code=404, detail="No publication found with the given ID or no changes made")
-    raise HTTPException(status_code=200, detail="publication updated successfully")
+        raise HTTPException(
+            status_code=404, detail="No publication found with the given ID or no changes made")
+    raise HTTPException(
+        status_code=200, detail="publication updated successfully")
 
 
 @app.delete("/{id}")
 @handle_exception
-async def remove_publication(id:str):
+async def remove_publication(id: str):
     """
     Delete a specific publication by its id.
 
@@ -158,12 +174,15 @@ async def remove_publication(id:str):
     - HTTPException: If the id is invalid, the publication is not found, or the deletion is not successful.
     """
     if not ObjectId.is_valid(id):
-        raise HTTPException(status_code=404, detail="Invalid publication ID format")
+        raise HTTPException(
+            status_code=404, detail="Invalid publication ID format")
     publication = await mag_con.find_one({"_id": ObjectId(id)})
     if not publication:
         raise HTTPException(status_code=404, detail="publication not found")
     delete_result = await mag_con.delete_one({"_id": ObjectId(id)})
     if delete_result.deleted_count == 1:
-        raise HTTPException(status_code=200,detail = f"publication with id {id} is successfully deleted")
+        raise HTTPException(status_code=200, detail=f"publication with id {
+                            id} is successfully deleted")
     else:
-        raise HTTPException(status_code=500, detail="Failed to delete the publication")
+        raise HTTPException(
+            status_code=500, detail="Failed to delete the publication")
