@@ -2,28 +2,22 @@ from fastapi import APIRouter, HTTPException,File,UploadFile,Form
 from pydantic import BaseModel
 from utils import client
 from functools import wraps
-from motor.motor_asyncio import AsyncIOMotorGridFSBucket
 from bson import ObjectId
 
 app = APIRouter()
 mydb = client['Delit-test']
 connection = mydb.home
-fs=AsyncIOMotorGridFSBucket(mydb)
 
 # pydantic model
-
-
-class AllModel(BaseModel):
+class BlockModel(BaseModel):
     name: str
     content: str
-    link: str
+    image_link: str
 
 
 blocks = {"contact", "about", "clubtalk", "blog", "publications"}
 
 # This wrapper function to implement DRY principle to handle try-except block.
-
-
 def handle_exception(function):
     @wraps(function)
     async def wrapper(*arguments, **kwargs):
@@ -48,9 +42,9 @@ async def get_all_blocks() -> list:
     Each object represents a block with the following structure:
     - name : The name of the block.
     - content: A description of the block.
-    - link : The image link for the block.
+    - image_link : The image image_link for the block.
     Returns :
-        list: A list of dictionaries containing block data (name, content, and image link).
+        list: A list of dictionaries containing block data (name, content, and image image_link).
     Raises:
         HTTPException: If no data is found in the database.
     """
@@ -78,7 +72,7 @@ async def get_block_data(name: str) -> dict:
         name (str): The name of the block to retrieve.
 
     Returns:
-        dict: A dictionary containing the block's data (name, content, and image link).
+        dict: A dictionary containing the block's data (name, content, and image image_link).
 
     Raises:
         HTTPException: If the block name is invalid or the data is not found in the database.
@@ -97,87 +91,33 @@ async def get_block_data(name: str) -> dict:
     return result
 
 
-@app.put('/block1')
-async def update_contact(data: AllModel):
-    updated_data = data.dict()
-    result = await connection.find_one({"name": "contact"})
-    if result:
-        await connection.update_one({"name": "contact"}, {"$set": updated_data})
-        return {"message": "Contact updated successfully"}
-    else:
-        await connection.insert_one(updated_data)
-        return {"message": "Contact created successfully"}
-
-
-@app.put('/update_magazine')
-async def update_magazine(data: AllModel):
-    updated_data = data.dict()
-    result = await connection.find_one({"name": "magazine"})
-    if result:
-        await connection.update_one({"name": "magazine"}, {"$set": updated_data})
-        return {"message": "Magazine updated successfully"}
-    else:
-        await connection.insert_one(updated_data)
-        return {"message": "Magazine created successfully"}
-
-
-@app.put('/update_about')
-async def update_about(data: AllModel):
-    updated_data = data.dict()
-    result = await connection.find_one({"name": "about"})
-    if result:
-        await connection.update_one({"name": "about"}, {"$set": updated_data})
-        return {"message": "About section updated successfully"}
-    else:
-        await connection.insert_one(updated_data)
-        return {"message": "About section created successfully"}
-
-
-@app.put('/update_blog')
-async def update_blog(data: AllModel):
-    updated_data = data.dict()
-    result = await connection.find_one({"name": "blog"})
-    if result:
-        await connection.update_one({"name": "blog"}, {"$set": updated_data})
-        return {"message": "Blog updated successfully"}
-    else:
-        await connection.insert_one(updated_data)
-        return {"message": "Blog created successfully"}
-
-
-@app.put('/update_clubtalk')
-async def update_clubtalk(data: AllModel):
-    updated_data = data.dict()
-    result = await connection.find_one({"name": "clubtalk"})
-    if result:
-        await connection.update_one({"name": "clubtalk"}, {"$set": updated_data})
-        return {"message": "Clubtalk updated successfully"}
-    else:
-        await connection.insert_one(updated_data)
-        return {"message": "Clubtalk created successfully"}
-    
-@app.put("/update_banner")
+@app.put('/{block_name}')
 @handle_exception
-async def update_banner(file:UploadFile=File(...)):
+async def update_block(block_name: str, data: BlockModel):
     """
-    Updates the HomeBanner:
-        This function is used to update the Banner in the home page in regular intervals,
-        Here the image is uploaded from the user and the image is converted in string and stored in the database.
+    Update a specific block by its name.
+
+    Args:
+    - block_name (str): The name of the block to update.
+    - data (BlockModel): The data to be updated.
+
+    Returns:
+    - result (dict): A dictionary containing the status of the update.
+                    If the update is successful, it will contain {"success": "block updated successfully"}.
+                    If the update is not successful, it will contain the error message.
+
+    Raises:
+    - HTTPException: If the block name is invalid or the data is not found in the database.
     """
-   
-    # reads the uploaded file
-    file_content=await file.read()
+    block_name = block_name.lower()
 
-    #stores the uploaded file in the database
-    grid_in=fs.open_upload_stream(filename=file.filename)
-
-    #writes the content in the file into chunks
-    await grid_in.write(file_content)
-
-    #Finalizes the file by closing
-    await grid_in.close()
-    #File Id
-    file_id=grid_in._id  
-   
-    return{"message":"File Uploaded successfully","_id":str(file_id)} 
-
+    if block_name not in blocks:
+        raise HTTPException(
+            status_code=404, detail="Invalid block accessed. Check the name correctly.")
+    result = await connection.find_one({"name": block_name})
+    if not result:
+        raise HTTPException(
+            status_code=404, detail="Data not found in the database.")
+    updated_data = data.dict()
+    await connection.update_one({"name": block_name}, {"$set": updated_data})
+    return {"message": "Block updated successfully"}
