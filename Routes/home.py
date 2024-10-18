@@ -3,16 +3,11 @@ from pydantic import BaseModel
 from utils import client
 from functools import wraps
 from bson import ObjectId
+from Models.home_model import BlockModel
 
 app = APIRouter()
 mydb = client['Delit-test']
 connection = mydb.home
-
-# pydantic model
-class BlockModel(BaseModel):
-    name: str
-    content: str
-    image_link: str
 
 
 blocks = {"contact", "about", "clubtalk", "blog", "publications"}
@@ -39,12 +34,15 @@ async def get_all_blocks() -> list:
     Retrieve data for all 4 blocks on the homepage.
 
     This function fetches data from the database, formats it, and returns a list of objects.
+    
     Each object represents a block with the following structure:
     - name : The name of the block.
     - content: A description of the block.
     - image_link : The image image_link for the block.
+    
     Returns :
         list: A list of dictionaries containing block data (name, content, and image image_link).
+    
     Raises:
         HTTPException: If no data is found in the database.
     """
@@ -66,6 +64,7 @@ async def get_block_data(name: str) -> dict:
 
     This function takes the block name as input, converts it to lowercase, checks if it exists in the predefined blocks list,
     and then retrieves the corresponding data from the database.
+    
     If the block is invalid or not found in the database, an appropriate HTTPException is raised.
 
     Args:
