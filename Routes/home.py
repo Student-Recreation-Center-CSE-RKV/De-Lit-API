@@ -3,16 +3,11 @@ from pydantic import BaseModel
 from utils import client
 from functools import wraps
 from bson import ObjectId
+from Models.home_model import BlockModel
 
 app = APIRouter()
 mydb = client['Delit-test']
 connection = mydb.home
-
-# pydantic model
-class BlockModel(BaseModel):
-    name: str
-    content: str
-    image_link: str
 
 
 blocks = {"contact", "about", "clubtalk", "blog", "publications"}

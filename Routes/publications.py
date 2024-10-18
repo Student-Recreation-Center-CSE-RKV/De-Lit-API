@@ -6,27 +6,12 @@ from utils import client
 import datetime
 from functools import wraps
 from typing import Optional
+from Models.publication_model import Publication,update
 
 app = APIRouter()
 mydb = client['Delit-test']
 mag_con = mydb.publication
 
-
-class Publication(BaseModel):
-    publication_name: str
-    link: str
-    description: str
-    publication_type: str
-    img_link: str
-    created_at: datetime.datetime = datetime.datetime.now()
-
-
-class update(BaseModel):
-    publication_name: Optional[str]
-    link: Optional[str]
-    description: Optional[str]
-    publication_type: Optional[str]
-    img_link: Optional[str]
 
 # This wrapper function to implement DRY principle to handle try-except block.
 
@@ -153,7 +138,7 @@ async def update_publication(id: str, update_data: update):
         raise HTTPException(
             status_code=404, detail="No publication found with the given ID or no changes made")
     raise HTTPException(
-        status_code=200, detail="publication updated successfully")
+        status_code=201, detail="publication updated successfully")
 
 
 @app.delete("/{id}")
@@ -181,8 +166,8 @@ async def remove_publication(id: str):
         raise HTTPException(status_code=404, detail="publication not found")
     delete_result = await mag_con.delete_one({"_id": ObjectId(id)})
     if delete_result.deleted_count == 1:
-        raise HTTPException(status_code=200, detail=f"publication with id {
-                            id} is successfully deleted")
+        raise HTTPException(status_code=200,
+                            detail=f"publication with id {id} is successfully deleted")
     else:
         raise HTTPException(
             status_code=500, detail="Failed to delete the publication")

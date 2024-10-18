@@ -3,6 +3,8 @@ from pydantic import BaseModel
 from utils import client
 from functools import wraps
 from motor.motor_asyncio import AsyncIOMotorGridFSBucket
+from typing import Optional
+from Models.banner_model import Banner_model
 
 app = APIRouter()
 mydb = client['Delit-test']
@@ -24,10 +26,6 @@ def handle_exception(function):
                 status_code=500, detail=f"An unknown error occurred.{str(e)}")
 
     return wrapper
-
-
-class Banner_model(BaseModel):
-    image_link: str
 
 
 @app.put("/update_banner")
