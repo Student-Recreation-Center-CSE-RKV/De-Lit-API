@@ -1,4 +1,4 @@
-from fastapi import APIRouter , HTTPException, File, UploadFile, Form 
+from fastapi import APIRouter, HTTPException, File, UploadFile, Form
 from pydantic import BaseModel
 from functools import wraps
 from typing import Optional
@@ -7,9 +7,10 @@ import datetime
 import base64
 import httpx
 import re
-from utils import client
+from utils import client, handle_exception
 import os
 from dotenv import load_dotenv
+from Models.gallery_model import Image, ImageUpdateModel
 
 # Load the .env file
 load_dotenv()
@@ -24,37 +25,9 @@ gallery_db = mydb.gallery
 
 REPO_OWNER = "N-Harsha-Vardhan-Dev"
 REPO_NAME = "De-Lit-API"
-FOLDER_PATH = "Resources/Gallery"  # Path to the folder in your repo where files are stored
+# Path to the folder in your repo where files are stored
+FOLDER_PATH = "Resources/Gallery"
 
-
-class Image(BaseModel):
-    event_name: str
-    image_id : str
-    # link: str
-    date: str
-    description: str
-    created_at: datetime.datetime = datetime.datetime.now()
-
-class ImageUpdateModel(BaseModel):
-    event_name: Optional[str] = None
-    image_id: Optional[str] = None
-    date: Optional[str] = None
-    description: Optional[str] = None
-
-#Functions
-
-def handle_exception(function):
-# This wrapper function to implement DRY principle to handle try-except block.
-    @wraps(function)
-    async def wrapper(*arguments, **kwargs):
-        try:
-            return await function(*arguments, **kwargs)
-        except HTTPException as http_exce:
-            raise http_exce
-        except Exception as e:
-            raise HTTPException(
-                status_code=500, detail=f"An unknown error occurred.{str(e)}")
-    return wrapper
 
 async def upload_to_github(file_content, file_name):
     """ Uploading the actual image file into github repository
@@ -65,8 +38,9 @@ async def upload_to_github(file_content, file_name):
 
     Returns:
         object : httpx.Response object
-    """    
-    url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{FOLDER_PATH}/{file_name}"
+    """
+    url = f"https://api.github.com/repos/{REPO_OWNER}/{
+        REPO_NAME}/contents/{FOLDER_PATH}/{file_name}"
     headers = {
         "Authorization": f"token {GITHUB_TOKEN}",
         "Accept": "application/vnd.github.v3+json"
@@ -75,12 +49,14 @@ async def upload_to_github(file_content, file_name):
     now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     data = {
         "message": f"Add {file_name} at {now}",
-        "content": base64.b64encode(file_content).decode("utf-8") # Encode image content into base64
+        # Encode image content into base64
+        "content": base64.b64encode(file_content).decode("utf-8")
     }
     response = httpx.put(url, json=data, headers=headers)
     return response
 
-async def delete_file_from_github(link:str):
+
+async def delete_file_from_github(link: str):
     """ Delete the file from github repository
 
     Args:
@@ -91,7 +67,7 @@ async def delete_file_from_github(link:str):
 
     Returns:
         object : httpx.Response object
-    """    
+    """
     pattern = r"blob/[^/]+/(.+)"
     match = re.search(pattern, link)
     if not match:
@@ -99,13 +75,14 @@ async def delete_file_from_github(link:str):
             status_code=404, detail="Link Not Found"
         )
     file_path = match.group(1)
-    
-    url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{file_path}"
+
+    url = f"https://api.github.com/repos/{
+        REPO_OWNER}/{REPO_NAME}/contents/{file_path}"
     headers = {
         "Authorization": f"token {GITHUB_TOKEN}",
         "Accept": "application/vnd.github.v3+json"
     }
-    
+
     async with httpx.AsyncClient() as client:
         response = await client.get(url, headers=headers)
     if response.status_code != 200:
@@ -121,10 +98,10 @@ async def delete_file_from_github(link:str):
     return response
 
 
-#API END POINTS
+# API END POINTS
 @app.get("/")
 @handle_exception
-async def get_gallery() :
+async def get_gallery():
     """
     Retrieve all images from the database.
 
@@ -135,18 +112,19 @@ async def get_gallery() :
     - HTTPException: If there is an error while fetching the images (gallery).
     """
     images = []
-    async for image in gallery_db.find().sort("created_at", -1) :
+    async for image in gallery_db.find().sort("created_at", -1):
         image["_id"] = str(image["_id"])
         images.append(image)
-    if not images :
+    if not images:
         raise HTTPException(
             status_code=404, detail="No images found. Please Upload images."
         )
     return images
 
+
 @app.get("/{id}")
 @handle_exception
-async def get_single_image(id:str):
+async def get_single_image(id: str):
     """
     Retrieve a single image that have id
 
@@ -159,7 +137,7 @@ async def get_single_image(id:str):
 
     Returns:
         image : image meta data (image details))
-    """    
+    """
     if not ObjectId.is_valid(id):
         raise HTTPException(status_code=400, detail="Invalid image ID format")
     image = await gallery_db.find_one({"_id": ObjectId(id)})
@@ -169,6 +147,7 @@ async def get_single_image(id:str):
     image["_id"] = str(image["_id"])
     return image
 
+
 @app.post("/")
 @handle_exception
 async def upload_image(
@@ -177,9 +156,9 @@ async def upload_image(
     # link: str = Form(...),
     date: str = Form(...),
     description: str = Form(...),
-    file: UploadFile = File(...),  
+    file: UploadFile = File(...),
     # form is used when we include basemodel with upload file
-) :
+):
     """ Uploading image in github and its meta data in mongodb database
 
     Args:
@@ -195,9 +174,9 @@ async def upload_image(
 
     Returns:
         image : image meta data (image details)
-    """    
-    
-    image = Image( # Manually done
+    """
+
+    image = Image(  # Manually done
         event_name=event_name,
         image_id=image_id,
         # link=link,
@@ -212,21 +191,23 @@ async def upload_image(
     if response.status_code == 201:
         file_url = response.json().get("content", {}).get("html_url", "")
     else:
-        raise HTTPException(status_code=400, detail="Error uploading file to GitHub")
+        raise HTTPException(
+            status_code=400, detail="Error uploading file to GitHub")
     image["link"] = file_url
     image["created_at"] = datetime.datetime.now()
     result = await gallery_db.insert_one(image)
-    if result.inserted_id :
+    if result.inserted_id:
         image["_id"] = str(result.inserted_id)
         return image
-    else :
+    else:
         raise HTTPException(
             status_code=400, detail="Can't upload image document into database"
         )
 
+
 @app.put("/{id}")
 @handle_exception
-async def update_image(id: str, update_data: ImageUpdateModel):    
+async def update_image(id: str, update_data: ImageUpdateModel):
     """ Update an existing image document in the database
 
     Args:
@@ -244,10 +225,12 @@ async def update_image(id: str, update_data: ImageUpdateModel):
     if not ObjectId.is_valid(id):
         raise HTTPException(status_code=404, detail="Invalid image ID format")
     # Convert the update_data to a dictionary and remove None values
-    update_data_dict = {k: v for k, v in update_data.dict().items() if (v.strip() != "" and v != "string")}
-    
+    update_data_dict = {k: v for k, v in update_data.dict(
+    ).items() if (v.strip() != "" and v != "string")}
+
     if not update_data_dict:
-        raise HTTPException(status_code=400, detail="No fields provided for update")
+        raise HTTPException(
+            status_code=400, detail="No fields provided for update")
 
     update_data_dict['created_at'] = datetime.datetime.now()
     result = await gallery_db.update_one(
@@ -255,10 +238,12 @@ async def update_image(id: str, update_data: ImageUpdateModel):
         {"$set": update_data_dict}  # Set the fields to be updated
     )
 
-    if result.modified_count :
+    if result.modified_count:
         return {"status": "success", "message": "Document updated successfully"}
     else:
-        raise HTTPException(status_code=404, detail="Document not found or no changes made")
+        raise HTTPException(
+            status_code=404, detail="Document not found or no changes made")
+
 
 @app.delete("/{id}")
 @handle_exception
@@ -273,14 +258,14 @@ async def remove_image(id: str):
         HTTPException: 409 (if Unable to delete the image in github)
         HTTPException: 500 (if Failed to delete the image document in database)
         HTTPException: 200 (if image is successfully deleted)
-    """    
+    """
     if not ObjectId.is_valid(id):
         raise HTTPException(status_code=404, detail="Invalid image ID format")
     image = await gallery_db.find_one({"_id": ObjectId(id)})
     if not image:
         raise HTTPException(status_code=404, detail="Image not found")
     response = await delete_file_from_github(image["link"])
-    if response.status_code != 200 : 
+    if response.status_code != 200:
         raise HTTPException(
             status_code=409, detail="Conflict: Unable to delete the image"
         )

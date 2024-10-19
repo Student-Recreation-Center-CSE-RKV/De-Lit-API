@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from typing import Optional
 import datetime
 
+
 class blog(BaseModel):
     author: str
     blog_name: str
@@ -9,6 +10,7 @@ class blog(BaseModel):
     content: str
     overview: str
     created_at: datetime.datetime = datetime.datetime.now()
+
 
 class update(BaseModel):
     author: Optional[str]
