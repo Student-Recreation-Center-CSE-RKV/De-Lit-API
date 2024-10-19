@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-import Routes.home as home,Routes.publications as publications,Routes.blog as blog,Routes.banner as banner
+import Routes.home as home,Routes.publications as publications,Routes.blog as blog,Routes.banner as banner, Routes.gallery as gallery
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo.server_api import ServerApi
 
@@ -8,6 +8,7 @@ app = FastAPI()
 app.include_router(home.app, prefix="/home")
 app.include_router(publications.app, prefix="/publications")
 app.include_router(blog.app,prefix = "/blog")
+app.include_router(gallery.app , prefix="/gallery")
 app.include_router(banner.app,prefix = "/banner")
 @app.get("/")
 async def root_message():
