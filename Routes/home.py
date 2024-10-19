@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from utils import client, handle_exception
 from functools import wraps
 from bson import ObjectId
-from Models.home_model import BlockModel
+from models.home_model import BlockModel
 
 app = APIRouter()
 mydb = client["Delit-test"]

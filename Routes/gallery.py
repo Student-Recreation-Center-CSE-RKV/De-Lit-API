@@ -1,101 +1,14 @@
 from fastapi import APIRouter, HTTPException, File, UploadFile, Form
-from pydantic import BaseModel
-from functools import wraps
-from typing import Optional
-from bson import ObjectId
 import datetime
-import base64
-import httpx
-import re
-from utils import client, handle_exception
-import os
-from dotenv import load_dotenv
-from Models.gallery_model import Image, ImageUpdateModel
+from bson import ObjectId
+from utils import client, upload_to_github, handle_exception, delete_file_from_github
+from models.gallery_model import Image, ImageUpdateModel
 
-# Load the .env file
-load_dotenv()
-
-# Access the variables
-GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 
 app = APIRouter()
 
 mydb = client['Delit-test']
 gallery_db = mydb.gallery
-
-REPO_OWNER = "N-Harsha-Vardhan-Dev"
-REPO_NAME = "De-Lit-API"
-# Path to the folder in your repo where files are stored
-FOLDER_PATH = "Resources/Gallery"
-
-
-async def upload_to_github(file_content, file_name):
-    """ Uploading the actual image file into github repository
-
-    Args:
-        file_content ( File ): actual file 
-        file_name ( str ): name of the file
-
-    Returns:
-        object : httpx.Response object
-    """
-    url = f"https://api.github.com/repos/{REPO_OWNER}/{
-        REPO_NAME}/contents/{FOLDER_PATH}/{file_name}"
-    headers = {
-        "Authorization": f"token {GITHUB_TOKEN}",
-        "Accept": "application/vnd.github.v3+json"
-    }
-    # Get current time for commit message
-    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    data = {
-        "message": f"Add {file_name} at {now}",
-        # Encode image content into base64
-        "content": base64.b64encode(file_content).decode("utf-8")
-    }
-    response = httpx.put(url, json=data, headers=headers)
-    return response
-
-
-async def delete_file_from_github(link: str):
-    """ Delete the file from github repository
-
-    Args:
-        link (str): path of the file 
-
-    Raises:
-        HTTPException: 404 (if repository not found)
-
-    Returns:
-        object : httpx.Response object
-    """
-    pattern = r"blob/[^/]+/(.+)"
-    match = re.search(pattern, link)
-    if not match:
-        HTTPException(
-            status_code=404, detail="Link Not Found"
-        )
-    file_path = match.group(1)
-
-    url = f"https://api.github.com/repos/{
-        REPO_OWNER}/{REPO_NAME}/contents/{file_path}"
-    headers = {
-        "Authorization": f"token {GITHUB_TOKEN}",
-        "Accept": "application/vnd.github.v3+json"
-    }
-
-    async with httpx.AsyncClient() as client:
-        response = await client.get(url, headers=headers)
-    if response.status_code != 200:
-        raise HTTPException(
-            status_code=404, detail="Folder not found"
-        )
-    sha = response.json()["sha"]
-    data = {
-        "message": f"Delete {file_path}",
-        "sha": sha
-    }
-    response = httpx.delete(url, params=data, headers=headers)
-    return response
 
 
 # API END POINTS

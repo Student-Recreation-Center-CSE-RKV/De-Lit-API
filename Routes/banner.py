@@ -4,7 +4,7 @@ from utils import client, handle_exception
 from functools import wraps
 from motor.motor_asyncio import AsyncIOMotorGridFSBucket
 from typing import Optional
-from Models.banner_model import Banner_model
+from models.banner_model import Banner_model
 
 app = APIRouter()
 mydb = client['Delit-test']
