@@ -69,10 +69,10 @@ async def upload_image(
     # link: str = Form(...),
     date: str = Form(...),
     description: str = Form(...),
-    file: UploadFile = File(...),
+    file: UploadFile = File(...),  
     # form is used when we include basemodel with upload file
-):
-    """ Uploading image in github and its meta data in mongodb database
+) :
+    """ Uploading image in github and its meta data in mongodb database.
 
     Args:
         event_name (str, optional): Name of the event. Defaults to Form(...).
@@ -87,9 +87,9 @@ async def upload_image(
 
     Returns:
         image : image meta data (image details)
-    """
-
-    image = Image(  # Manually done
+    """    
+    
+    image = Image( # Manually done
         event_name=event_name,
         image_id=image_id,
         # link=link,
@@ -104,15 +104,14 @@ async def upload_image(
     if response.status_code == 201:
         file_url = response.json().get("content", {}).get("html_url", "")
     else:
-        raise HTTPException(
-            status_code=400, detail="Error uploading file to GitHub")
+        raise HTTPException(status_code=400, detail="Error uploading file to GitHub")
     image["link"] = file_url
     image["created_at"] = datetime.datetime.now()
     result = await gallery_db.insert_one(image)
-    if result.inserted_id:
+    if result.inserted_id :
         image["_id"] = str(result.inserted_id)
         return image
-    else:
+    else :
         raise HTTPException(
             status_code=400, detail="Can't upload image document into database"
         )

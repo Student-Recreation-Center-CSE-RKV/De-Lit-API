@@ -7,14 +7,13 @@ import base64
 import httpx
 import re
 
-
 url = "mongodb+srv://phanivutla2004:phaniphani@cluster0.gddku.mongodb.net/myFirstDatabase?retryWrites=true&w=majority&ssl=true"
 client = AsyncIOMotorClient(url, server_api=ServerApi('1'), serverSelectionTimeoutMS=5000)
 
-GITHUB_TOKEN = "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"
+GITHUB_TOKEN = "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"
 REPO_OWNER = "venkataPhanindraVutla"
-REPO_NAME = "De-Lit-API"
-FOLDER_PATH = "Resources/Gallery"
+REPO_NAME = "Demo-Names"
+FOLDER_PATH = "de-lit-test-resources"
 
 
 def handle_exception(function):
@@ -32,7 +31,7 @@ def handle_exception(function):
 
 
 async def upload_to_github(file_content, file_name):
-    """ Uploading the given file into github repository
+    """ Uploading the actual image file into github repository
 
     Args:
         file_content ( File ): actual file 
@@ -40,7 +39,7 @@ async def upload_to_github(file_content, file_name):
 
     Returns:
         object : httpx.Response object
-    """
+    """    
     url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{FOLDER_PATH}/{file_name}"
     headers = {
         "Authorization": f"token {GITHUB_TOKEN}",
@@ -50,12 +49,10 @@ async def upload_to_github(file_content, file_name):
     now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     data = {
         "message": f"Add {file_name} at {now}",
-        # Encode image content into base64
-        "content": base64.b64encode(file_content).decode("utf-8")
+        "content": base64.b64encode(file_content).decode("utf-8") # Encode image content into base64
     }
     response = httpx.put(url, json=data, headers=headers)
     return response
-
 
 async def delete_file_from_github(link: str):
     """ Delete the file from github repository
