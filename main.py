@@ -1,15 +1,29 @@
 from fastapi import FastAPI
-import Routes.home as home,Routes.publications as publications,Routes.blog as blog,Routes.banner as banner, Routes.gallery as gallery
-from motor.motor_asyncio import AsyncIOMotorClient
-from pymongo.server_api import ServerApi
+import routes.home as home
+import routes.publications as publications
+import routes.blog as blog
+import routes.banner as banner
+import routes.gallery as gallery
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
-#connections
-app.include_router(home.app, prefix="/home")
-app.include_router(publications.app, prefix="/publications")
-app.include_router(blog.app,prefix = "/blog")
-app.include_router(gallery.app , prefix="/gallery")
-app.include_router(banner.app,prefix = "/banner")
-@app.get("/")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins or specify a list of origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# routers
+app.include_router(home.app, prefix="/home",tags=["Home"])
+app.include_router(publications.app, prefix="/publications",tags=["Publications"])
+app.include_router(blog.app, prefix="/blog",tags=["Blog"])
+app.include_router(gallery.app, prefix="/gallery",tags=["Gallery"])
+app.include_router(banner.app, prefix="/banner",tags=["Banner"])
+
+
+@app.get("/",tags=["Root"])
 async def root_message():
-    return {"message":"Welcome to the Delit-test API. Use the docs to get started. http://localhost:8000/docs"}
+    return {"message": "Welcome to the Delit-test API. Use the docs to get started."}

@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from typing import Optional
 import datetime
 
+
 class Publication(BaseModel):
     publication_name: str
     link: str

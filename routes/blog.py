@@ -1,30 +1,15 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from bson import ObjectId
-from utils import client
+from utils import client, handle_exception
 from functools import wraps
 import datetime
 from typing import Optional
-from Models.blog_model import blog,update
+from models.blog_model import blog, update
 
 app = APIRouter()
 mydb = client['Delit-test']
 blog_con = mydb.blog
-
-
-# This wrapper function to implement DRY principle to handle try-except block.
-def handle_exception(function):
-    @wraps(function)
-    async def wrapper(*arguments, **kwargs):
-        try:
-            return await function(*arguments, **kwargs)
-        except HTTPException as http_exce:
-            raise http_exce
-        except Exception as e:
-            raise HTTPException(
-                status_code=500, detail=f"An unknown error occurred.{str(e)}")
-
-    return wrapper
 
 
 @app.post("/")
@@ -32,7 +17,7 @@ def handle_exception(function):
 async def upload_blog(blog: blog) -> blog:
     """
     Upload a blog to the database.
-    
+
     Structure of blog:
         {
             "author": "string",

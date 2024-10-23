@@ -1,31 +1,15 @@
 from fastapi import APIRouter, HTTPException, File, UploadFile, Form
 from pydantic import BaseModel
-from utils import client
+from utils import client, handle_exception
 from functools import wraps
 from motor.motor_asyncio import AsyncIOMotorGridFSBucket
 from typing import Optional
-from Models.banner_model import Banner_model
+from models.banner_model import Banner_model
 
 app = APIRouter()
 mydb = client['Delit-test']
 connection = mydb.home
 fs = AsyncIOMotorGridFSBucket(mydb)
-
-# This wrapper function to implement DRY principle to handle try-except block.
-
-
-def handle_exception(function):
-    @wraps(function)
-    async def wrapper(*arguments, **kwargs):
-        try:
-            return await function(*arguments, **kwargs)
-        except HTTPException as http_exce:
-            raise http_exce
-        except Exception as e:
-            raise HTTPException(
-                status_code=500, detail=f"An unknown error occurred.{str(e)}")
-
-    return wrapper
 
 
 @app.put("/update_banner")
@@ -36,10 +20,10 @@ async def update_banner(file: UploadFile = File(...)):
 
     Args:
     - file (UploadFile): The file to be uploaded.
-    
+
     Returns:
     - dict: A dictionary containing the message "File Uploaded successfully" and the "_id" of the file in the database.
-    
+
     Raises:
     - HTTPException: If there is an error while uploading the file.
     """
