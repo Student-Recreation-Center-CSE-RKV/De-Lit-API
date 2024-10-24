@@ -3,9 +3,9 @@ from pydantic import BaseModel
 from utils import client, handle_exception
 from functools import wraps
 from bson import ObjectId
-from models.home_model import BlockModel
+from Models.home_model import BlockModel
 
-app = APIRouter()
+app = APIRouter(tags=['Home'])
 mydb = client["Delit-test"]
 connection = mydb.home
 

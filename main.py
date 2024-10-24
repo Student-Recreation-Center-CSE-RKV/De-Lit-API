@@ -1,9 +1,9 @@
 from fastapi import FastAPI
-import routes.home as home
-import routes.publications as publications
-import routes.blog as blog
-import routes.banner as banner
-import routes.gallery as gallery
+import Routes.home as home
+import Routes.publications as publications
+import Routes.blog as blog
+import Routes.banner as banner
+import Routes.gallery as gallery
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()

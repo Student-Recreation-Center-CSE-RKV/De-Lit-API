@@ -2,10 +2,10 @@ from fastapi import APIRouter, HTTPException, File, UploadFile, Form
 import datetime
 from bson import ObjectId
 from utils import client, upload_to_github, handle_exception, delete_file_from_github
-from models.gallery_model import Image, ImageUpdateModel
+from Models.gallery_model import Image, ImageUpdateModel
 
 
-app = APIRouter()
+app = APIRouter(tags=['Gallery'])
 
 mydb = client['Delit-test']
 gallery_db = mydb.gallery

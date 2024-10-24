@@ -8,12 +8,12 @@ import httpx
 import re
 
 url = "mongodb+srv://phanivutla2004:phaniphani@cluster0.gddku.mongodb.net/myFirstDatabase?retryWrites=true&w=majority&ssl=true"
-client = AsyncIOMotorClient(url, server_api=ServerApi('1'), serverSelectionTimeoutMS=5000)
+client = AsyncIOMotorClient(url, server_api=ServerApi('1'),connectTimeoutMS = 50000)
 
-GITHUB_TOKEN = "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"
-REPO_OWNER = "venkataPhanindraVutla"
-REPO_NAME = "Demo-Names"
-FOLDER_PATH = "de-lit-test-resources"
+GITHUB_TOKEN = ""
+REPO_OWNER = "Harshad712"
+REPO_NAME = "RKV-SPORTS-API"
+FOLDER_PATH = "newfolder"
 
 
 def handle_exception(function):

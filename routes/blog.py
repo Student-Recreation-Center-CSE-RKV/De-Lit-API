@@ -5,9 +5,9 @@ from utils import client, handle_exception
 from functools import wraps
 import datetime
 from typing import Optional
-from models.blog_model import blog, update
+from Models.blog_model import blog, update
 
-app = APIRouter()
+app = APIRouter(tags=['Blog'])
 mydb = client['Delit-test']
 blog_con = mydb.blog
 
