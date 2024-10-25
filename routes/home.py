@@ -12,19 +12,21 @@ connection = mydb.home
 @handle_exception
 async def get_all_blocks() -> list:
     """
-    Retrieve data for all 4 blocks on the homepage.
+    Description :
 
-    This function fetches data from the database, formats it, and returns a list of objects.
-
-    Each object represents a block with the following structure:
-    - name : The name of the block.
-    - content: A description of the block.
-    - image_link : The image image_link for the block.
+        Retrieve data for all 4 blocks on the homepage.
+        This function fetches data from the database, formats it, and returns a list of objects.
+        Each object represents a block with the following structure:
+        - name : The name of the block.
+        - content: A description of the block.
+        - image_link : The image image_link for the block.
 
     Returns :
+
         list: A list of dictionaries containing block data (name, content, and image image_link).
 
     Raises:
+
         HTTPException: If no data is found in the database.
     """
     result = await connection.find().to_list(length=None)
