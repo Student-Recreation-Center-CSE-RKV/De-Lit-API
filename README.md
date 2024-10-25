@@ -42,6 +42,9 @@
     ```bash
     fastapi dev main.py
     ```
+    ```windows
+    python -m uvicorn main:app --reload
+    ```
 
 2. **Access the API**:
 
