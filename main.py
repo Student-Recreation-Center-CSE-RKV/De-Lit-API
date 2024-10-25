@@ -1,9 +1,10 @@
 from fastapi import FastAPI
-import Routes.home as home
-import Routes.publications as publications
-import Routes.blog as blog
-import Routes.banner as banner
-import Routes.gallery as gallery
+import routes.home as home
+import routes.publications as publications
+import routes.blog as blog
+import routes.banner as banner
+import routes.gallery as gallery
+import routes.file_upload as file_upload
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -22,7 +23,7 @@ app.include_router(publications.app, prefix="/publications",tags=["Publications"
 app.include_router(blog.app, prefix="/blog",tags=["Blog"])
 app.include_router(gallery.app, prefix="/gallery",tags=["Gallery"])
 app.include_router(banner.app, prefix="/banner",tags=["Banner"])
-
+app.include_router(file_upload.app, prefix="/file_upload",tags=["File Upload"])
 
 @app.get("/",tags=["Root"])
 async def root_message():

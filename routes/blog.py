@@ -1,11 +1,8 @@
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
 from bson import ObjectId
-from utils import client, handle_exception
-from functools import wraps
+from utilities.utils import client, handle_exception
 import datetime
-from typing import Optional
-from Models.blog_model import blog, update
+from models.blog_model import blog, update
 
 app = APIRouter(tags=['Blog'])
 mydb = client['Delit-test']
