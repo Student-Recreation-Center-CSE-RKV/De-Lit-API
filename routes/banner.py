@@ -1,16 +1,11 @@
 from fastapi import APIRouter, HTTPException, File, UploadFile, Form
-from pydantic import BaseModel
-from utils import client, handle_exception,upload_to_github
-from functools import wraps
-from motor.motor_asyncio import AsyncIOMotorGridFSBucket
-from typing import Optional
-from Models.banner_model import Banner_model
-from bson import ObjectId
+from utilities.utils import client, handle_exception
+from models.banner_model import Banner_model
+from utilities.gtihub_utilities import upload_to_github
 
 app = APIRouter(tags=['Banner'])
 mydb = client['Delit-test']
 banner_db = mydb.Banners
-
 
 
 @app.put("/")

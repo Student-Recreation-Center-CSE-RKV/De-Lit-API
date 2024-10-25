@@ -1,12 +1,11 @@
 from fastapi import APIRouter, HTTPException,File,UploadFile,Form
-import json
-from pydantic import BaseModel
 from bson import ObjectId
-from utils import client, handle_exception,upload_to_github
+from utilities.utils import client, handle_exception
+from utilities.gtihub_utilities import upload_to_github
 import datetime
 from functools import wraps
 from typing import Optional
-from Models.publication_model import Publication, Update_publication
+from models.publication_model import Publication, Update_publication
 
 app = APIRouter(tags=['Publications'])
 mydb = client['Delit-test']
