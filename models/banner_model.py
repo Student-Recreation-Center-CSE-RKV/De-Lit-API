@@ -5,7 +5,7 @@ from datetime import datetime
 
 class Banner_model(BaseModel):
     created_at:datetime = Field(default_factory = datetime.now)
-    image_id:str
-    #link=link
+    banner_id:str
+    #Banner_link=link
     class config:
         arbitrary_types_allowed=True

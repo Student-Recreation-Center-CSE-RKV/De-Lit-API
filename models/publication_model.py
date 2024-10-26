@@ -16,4 +16,4 @@ class Update_publication(BaseModel):
     publication_name: Optional[str]
     description: Optional[str]
     publication_type: Optional[str]
-   # cover_image_link: Optional[str]
+    #cover_image_link: Optional[str]
