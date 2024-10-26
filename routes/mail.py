@@ -1,7 +1,6 @@
 from utilities.mail_utils import plain_mail
 from fastapi import APIRouter, HTTPException
 from utilities.utils import client, handle_exception
-from utilities.gtihub_utilities import upload_to_github, delete_file_from_github
 from models.email import EmailRequest
 
 app = APIRouter()
