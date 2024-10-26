@@ -1,5 +1,4 @@
-from fastapi import APIRouter, HTTPException, File, UploadFile, Form
-from pydantic import BaseModel
+from fastapi import APIRouter, HTTPException
 from utilities.utils import client, handle_exception
 from models.home_model import BlockModel
 
