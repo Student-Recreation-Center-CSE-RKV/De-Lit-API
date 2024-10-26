@@ -9,8 +9,8 @@ client = AsyncIOMotorClient(
 
 GITHUB_TOKEN = "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"
 REPO_OWNER = "Harshad712"
-REPO_NAME = "RKV-SPORTS-API"
-FOLDER_PATH = "newfolder"
+REPO_NAME = "De-Lit-Testing"
+FOLDER_PATH = "samples"
 
 
 def handle_exception(function):
