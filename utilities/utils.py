@@ -8,8 +8,8 @@ client = AsyncIOMotorClient(url, server_api=ServerApi('1'),connectTimeoutMS = 50
 
 GITHUB_TOKEN = ""
 REPO_OWNER = "Harshad712"
-REPO_NAME = "RKV-SPORTS-API"
-FOLDER_PATH = "newfolder"
+REPO_NAME = "De-Lit-Testing"
+FOLDER_PATH = "samples"
 
 
 def handle_exception(function):
