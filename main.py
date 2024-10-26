@@ -6,6 +6,7 @@ import routes.banner as banner
 import routes.gallery as gallery
 import routes.mail as mail
 import routes.file_upload as file_upload
+import routes.footer as footer
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -24,6 +25,7 @@ app.include_router(publications.app, prefix="/publications",tags=["Publications"
 app.include_router(blog.app, prefix="/blog",tags=["Blog"])
 app.include_router(gallery.app, prefix="/gallery",tags=["Gallery"])
 app.include_router(banner.app, prefix="/banner",tags=["Banner"])
+app.include_router(footer.app, prefix="/footer", tags=["Footer"])
 app.include_router(file_upload.app, prefix="/file_upload",tags=["File Upload"])
 app.include_router(mail.app, prefix="/mail",tags=["Mail"])
 

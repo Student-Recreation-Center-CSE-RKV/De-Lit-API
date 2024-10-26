@@ -16,13 +16,17 @@ gallery_db = mydb.gallery
 @handle_exception
 async def get_gallery():
     """
-    Retrieve all images from the database.
+    Summary :
+    
+        Retrieve all images from the database.
 
     Returns:
-    - images (list): List of images with each image as a dictionary containing the fields event_name, image_id, link, date, description, _id.
+    
+        images (list): List of images with each image as a dictionary containing the fields event_name, image_id, link, date, description, _id.
 
     Raises:
-    - HTTPException: If there is an error while fetching the images (gallery).
+    
+        HTTPException: If there is an error while fetching the images (gallery).
     """
     images = []
     async for image in gallery_db.find().sort("created_at", -1):
@@ -39,16 +43,21 @@ async def get_gallery():
 @handle_exception
 async def get_single_image(id: str):
     """
-    Retrieve a single image that have id
+    Summary :
+    
+        Retrieve a single image that have id
 
     Args:
+        
         id (str): unique _id of the image in database
 
     Raises:
+        
         HTTPException: 400 (Invalid image ID format)
         HTTPException: 404 (Image not found in database)
 
     Returns:
+        
         image : image meta data (image details))
     """
     if not ObjectId.is_valid(id):
@@ -72,9 +81,13 @@ async def upload_image(
     file: UploadFile = File(...),  
     # form is used when we include basemodel with upload file
 ) :
-    """ Uploading image in github and its meta data in mongodb database.
+    """
+    Summary :
+        
+        Uploading image in github and its meta data in mongodb database.
 
     Args:
+        
         event_name (str, optional): Name of the event. Defaults to Form(...).
         image_id (str, optional): Image number . Defaults to Form(...).
         # link (str, optional): No Need. Defaults to Form(...).
@@ -83,9 +96,11 @@ async def upload_image(
         file (UploadFile, optional): Actual image . Defaults to File(...).
 
     Raises:
+    
         HTTPException: 400 (if error in uploading image in github or meta data of image in database)
 
     Returns:
+    
         image : image meta data (image details)
     """    
     
@@ -120,17 +135,23 @@ async def upload_image(
 @app.put("/{id}")
 @handle_exception
 async def update_image(id: str, update_data: ImageUpdateModel):
-    """ Update an existing image document in the database
+    """ 
+    Summary :
+    
+        Update an existing image document in the database
 
     Args:
+    
         id (str): unique _id of image document
         update_data (ImageUpdateModel): A Pydantic model containing fields to be updated 
 
     Raises:
+    
         HTTPException: 404 (Invalid image id format or if document not found )
         HTTPException: 400 (No new details provided)
 
     Returns:
+    
         - dict: A dictionary with a success status and a message if the document is updated successfully.
 
     """
@@ -160,12 +181,17 @@ async def update_image(id: str, update_data: ImageUpdateModel):
 @app.delete("/{id}")
 @handle_exception
 async def remove_image(id: str):
-    """ Deleting an existing image in Github and image data in Mongodb
+    """
+    Summary :
+    
+        Deleting an existing image in Github and image data in Mongodb
 
     Args:
+    
         id (str): unique _id of image document
 
     Raises:
+    
         HTTPException: 404 (if Invalid image ID format or if image not found)
         HTTPException: 409 (if Unable to delete the image in github)
         HTTPException: 500 (if Failed to delete the image document in database)
