@@ -7,6 +7,8 @@ import routes.gallery as gallery
 import routes.mail as mail
 import routes.file_upload as file_upload
 import routes.footer as footer
+import routes.login as login
+import routes.users as users
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -28,6 +30,8 @@ app.include_router(banner.app, prefix="/banner",tags=["Banner"])
 app.include_router(footer.app, prefix="/footer", tags=["Footer"])
 app.include_router(file_upload.app, prefix="/file_upload",tags=["File Upload"])
 app.include_router(mail.app, prefix="/mail",tags=["Mail"])
+app.include_router(login.app, prefix="/login",tags=["Login"])
+app.include_router(users.app, prefix = "/users",tags=["User"])
 
 @app.get("/",tags=["Root"])
 async def root_message():
