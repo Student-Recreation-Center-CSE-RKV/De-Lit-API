@@ -21,8 +21,7 @@ class GetAllBlocks:
         """
         blocks = await connection.find().to_list(length=None)
         if not blocks:
-            raise HTTPException(
-                status_code=404, detail="Data not found in the database.")
+            raise HTTPException(status_code=404, detail="Data not found in the database.")
 
         for block in blocks:
             block["_id"] = str(block["_id"])  # Convert ObjectId to string
@@ -46,8 +45,7 @@ class GetBlockByName:
         """
         result = await connection.find_one({"name": block_name.lower()})
         if not result:
-            raise HTTPException(
-                status_code=404, detail="Data not found in the database.")
+            raise HTTPException(status_code=404, detail="Data not found in the database.")
 
         result["_id"] = str(result["_id"])
         return result
@@ -71,8 +69,7 @@ class UpdateBlock:
         """
         block = await connection.find_one({"name": block_name.lower()})
         if not block:
-            raise HTTPException(
-                status_code=404, detail="Data not found in the database.")
+            raise HTTPException(status_code=404, detail="Data not found in the database.")
 
         updated_data = data.model_dump()
         await connection.update_one({"name": block_name.lower()}, {"$set": updated_data})
@@ -121,8 +118,7 @@ class CreateBlock:
         # Check if the block name already exists
         existing_block = await connection.find_one({"name": data.name.lower()})
         if existing_block:
-            raise HTTPException(
-                status_code=400, detail="Block with this name already exists.")
+            raise HTTPException(status_code=400, detail="Block with this name already exists.")
 
         # Insert the new block
         new_block = data.model_dump()

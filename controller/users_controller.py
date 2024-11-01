@@ -2,11 +2,11 @@ from fastapi import HTTPException
 from models.users_model import User
 from utilities.login_utilities import login_db
 
-class UserController:
+class CreateUser:
     """Handles user-related operations, including creation, deletion, and retrieval."""
 
     @staticmethod
-    async def create_user(username: str, password: str) -> dict:
+    async def execute(username: str, password: str) -> dict:
         """
         Creates a user with the given username and password, stores the credentials in the database,
         and returns a success message if the operation is successful.
@@ -42,9 +42,9 @@ class UserController:
             return {"Message": "User Created Successfully"}
         else:
             raise HTTPException(status_code=404, detail="Error creating the user.")
-    
+class DeleteUser:
     @staticmethod
-    async def delete_user(username: str) -> None:
+    async def execute(username: str) -> None:
         """
         Deletes a user from the database based on the provided username.
 
@@ -77,9 +77,9 @@ class UserController:
             raise HTTPException(status_code=200, detail="User deleted successfully.")
         else:
             raise HTTPException(status_code=500, detail="Failed to delete the user.")
-    
+class GetAllUsers:
     @staticmethod
-    async def get_all_users() -> list:
+    async def execute() -> list:
         """
         Retrieve all users from the database.
 
