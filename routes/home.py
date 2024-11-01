@@ -89,4 +89,4 @@ async def create_block(data: BlockModel) -> dict:
     Raises:
         HTTPException: If a block with the same name already exists.
     """
-    return await CreateBlock.execute(data) 
+    return await CreateBlock.execute(data)
