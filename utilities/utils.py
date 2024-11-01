@@ -4,10 +4,9 @@ from fastapi import HTTPException
 from functools import wraps
 
 url = "mongodb+srv://phanivutla2004:phaniphani@cluster0.gddku.mongodb.net/myFirstDatabase?retryWrites=true&w=majority&ssl=true"
-client = AsyncIOMotorClient(
-    url, server_api=ServerApi("1"), connectTimeoutMS=50000)
+client = AsyncIOMotorClient(url, server_api=ServerApi("1"), connectTimeoutMS=50000)
 
-GITHUB_TOKEN = "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"
+GITHUB_TOKEN = "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"
 REPO_OWNER = "Harshad712"
 REPO_NAME = "De-Lit-Testing"
 FOLDER_PATH = "samples"
