@@ -1,142 +1,29 @@
-from fastapi import APIRouter,HTTPException,Form
+from fastapi import APIRouter, Form
+from controller.users_controller import UserController
 from utilities.utils import handle_exception
-from models.users_model import User
-from utilities.login_utilities import login_db
-
 
 app = APIRouter()
 
-
-@app.post("/create_user")
+@app.post("/", summary="Create a new user")
 @handle_exception
-async def create_user(username : str = Form(...),password : str = Form(...)):
+async def create_user(username: str = Form(...), password: str = Form(...)) -> dict:
     """
-    Creates a user with the given username and password, stores the credentials in the database,
-    and returns a success message if the operation is successful.
-
-    Args:
-        username (str): The username for the new user.
-        password (str): The password for the new user.
-
-    Returns:
-        dict: A dictionary containing a success message if the user is created successfully.
-
-    Raises:
-        HTTPException: 
-            - 404 : If there is an error while creating the user. 
-            - 409 : If any user already exits with the same username.
-            - 422: If the username or password is empty or None, with a message prompting the user to enter valid values.
+    API endpoint to create a new user with the specified username and password.
     """
-    if username == "" or username == None :
-        raise HTTPException(
-            status_code = 422,
-            detail = "Please Enter username to create user."
-        ) 
-    if password == "" or password == None :
-        raise HTTPException(
-            status_code = 422,
-            detail = "Please Enter Password to create user."
-        )
-    user_exists = await login_db. find_one({"username":username})
+    return await UserController.create_user(username, password)
 
-    if user_exists :
-        raise HTTPException(
-            status_code = 409,
-            detail = "Username already exists try again with different username."
-        )
-
-    user = User(
-        username = username,
-        password = password,
-    )
-    user = user.model_dump()
-    result = await login_db.insert_one(user)
-    
-    if result.inserted_id:
-        user["_id"] = str(result.inserted_id)
-        return {"Message":"User Created Successfully"}
-    else :
-        raise HTTPException(
-            status_code = 404,
-            detail = "Error while creating the user"
-        )
-    
-@app.delete("/delete_user")
+@app.delete("/", summary="Delete an existing user")
 @handle_exception
-async def delete_user(username : str = Form(...)):
-
+async def delete_user(username: str = Form(...)) -> None:
     """
-    Deletes a user from the database based on the provided username.
-
-    This function attempts to find a user by username in the `login_db` database. If a matching user is found,
-    it proceeds to delete the user record. Based on the result of the deletion operation, it raises an HTTP 
-    exception with an appropriate status and message.
-
-    Args:
-        username (str): The username of the user to delete.
-
-    Raises:
-        HTTPException: 
-            - 404: If no user with the provided username is found in the database.
-            - 200: If the user is successfully deleted.
-            - 500: If there is a failure to delete the user despite finding the user in the database.
-            - 422: If the username or password is empty or None, with a message prompting the user to enter valid values.
-
-    Returns:
-        None: Raises HTTP exceptions with relevant status codes and messages instead of returning data.
+    API endpoint to delete a user by username.
     """
-    if username == "" or username == None :
-        raise HTTPException(
-            status_code = 422,
-            detail = "Please Enter username to create user."
-        ) 
-    
-    user =await  login_db.find_one({"username":username})
-    if not user:
-        raise HTTPException(
-            status_code = 404,
-            detail = "No user found with the given Username."
-        )
-    deleting_user = await login_db.delete_one({"username":username})
+    return await UserController.delete_user(username)
 
-    if deleting_user.deleted_count == 1 :
-        raise HTTPException(
-            status_code = 200,
-            detail = "User Deleted Successfully."
-        )
-    else :
-        raise HTTPException(
-            status_code = 500,
-            detail = "Failed to Delete the User."
-        )
-        
-@app.get("/")
+@app.get("/", summary="Retrieve all users")
 @handle_exception
-async def all_users():
-
+async def all_users() -> list:
     """
-    Retrieve all users from the database.
-
-    This function fetches all user records from the 'login_db' collection, 
-    converts the '_id' field of each user to a string for JSON serialization, 
-    and returns a list of users. If no users are found, an HTTPException with 
-    a 404 status code is raised.
-
-    Returns:
-        List[dict]: A list of user dictionaries, where each dictionary 
-        represents a user's data.
-
-    Raises:
-        HTTPException: If no users are found, with a 404 status code and 
-        a "No users found" detail message.
+    API endpoint to retrieve all users in the database.
     """
-    users =[]
-    async for user in  login_db.find():
-        user["_id"] = str(user["_id"])
-        users.append(user)
-    if not users :
-        raise HTTPException(
-            status_code = 404,
-            detail = "No users found"
-        )
-    return users
+    return await UserController.get_all_users()
