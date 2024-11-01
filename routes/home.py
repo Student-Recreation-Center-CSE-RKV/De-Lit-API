@@ -1,130 +1,92 @@
 from fastapi import APIRouter, HTTPException
-from utilities.utils import client, handle_exception
 from models.home_model import BlockModel
-
+from controller.home_controller import GetAllBlocks, GetBlockByName, UpdateBlock, DeleteBlock ,CreateBlock
+from utilities.utils import handle_exception
 app = APIRouter(tags=['Home'])
-mydb = client["Delit-test"]
-connection = mydb.home
 
-
-@app.get("/")
+@app.get("/", response_model=list, summary="Fetch all homepage blocks")
 @handle_exception
 async def get_all_blocks() -> list:
     """
-    Description :
-
-        Retrieve data for all 4 blocks on the homepage.
-        This function fetches data from the database, formats it, and returns a list of objects.
-        Each object represents a block with the following structure:
-        - name : The name of the block.
-        - content: A description of the block.
-        - image_link : The image image_link for the block.
-
-    Returns :
-
-        list: A list of dictionaries containing block data (name, content, and image image_link).
-
-    Raises:
-
-        HTTPException: If no data is found in the database.
-    """
-    result = await connection.find().to_list(length=None)
-    if not result:
-        raise HTTPException(
-            status_code=404, detail="Data Not found in the database")
-    # Convert MongoDB ObjectId to string.
-    for res in result:
-        res["_id"] = str(res["_id"])
-    return result
-
-
-@app.get("/{name}")
-@handle_exception
-async def get_block_data(name: str) -> dict:
-    """
-    Description:
-        
-        Retrieve data for a specific block by name.
-        This function takes the block name as input, converts it to lowercase, checks if it exists in the predefined blocks list,and then retrieves the corresponding data from the database.
-        If the block is invalid or not found in the database, an appropriate HTTPException is raised.
-
-    Args:
-        
-        name (str): The name of the block to retrieve.
+    Retrieves all blocks on the homepage.
 
     Returns:
-        
-        dict: A dictionary containing the block's data (name, content, and image image_link).
+        list: List of blocks with data fields: name, content, image_link.
 
     Raises:
-        
-        HTTPException: If the block name is invalid or the data is not found in the database.
+        HTTPException: If no data is found (404).
     """
-    name = name.lower()
-    result = await connection.find_one({"name": name})
-    if not result:
-        raise HTTPException(
-            status_code=404, detail="Data not found in the database.")
-    # Convert the MongoDB ObjectId to a string
-    result["_id"] = str(result["_id"])
-    return result
+    return await GetAllBlocks.execute()
 
 
-@app.put("/{block_name}")
+@app.get("/{block_name}", response_model=dict, summary="Fetch specific block data")
 @handle_exception
-async def update_block(block_name: str, data: BlockModel):
+async def get_block_data(block_name: str) -> dict:
     """
-    Update a specific block by its name.
+    Retrieves a specific block by its name.
 
     Args:
-
-        block_name (str): The name of the block to update.
-        data (BlockModel): The data to be updated.
+        block_name (str): Name of the block to retrieve.
 
     Returns:
-
-        Result (dict): A dictionary containing the status of the update.
-                    If the update is successful, it will contain {"success": "block updated successfully"}.
-                    If the update is not successful, it will contain the error message.
+        dict: Block data (name, content, image_link).
 
     Raises:
-
-        HTTPException: If the block name is invalid or the data is not found in the database.
+        HTTPException: If block data is not found (404).
     """
-    block_name = block_name.lower()
-    result = await connection.find_one({"name": block_name})
-    if not result:
-        raise HTTPException(
-            status_code=404, detail="Data not found in the database.")
-    updated_data = data.model_dump()
-    await connection.update_one({"name": block_name}, {"$set": updated_data})
-    return {"message": "Block updated successfully"}
+    return await GetBlockByName.execute(block_name)
 
 
-@app.delete("/{block_name}")
+@app.put("/{block_name}", response_model=dict, summary="Update a specific block")
 @handle_exception
-async def delete_block(block_name: str):
+async def update_block(block_name: str, data: BlockModel) -> dict:
     """
-    Delete a specific block by its name.
+    Updates a block's data by its name.
 
     Args:
-
-        block_name (str): The name of the block to delete.
+        block_name (str): The block to be updated.
+        data (BlockModel): New data for the block.
 
     Returns:
-
-        result (dict): A dictionary containing the status of the deletion.
-            If the deletion is successful, it will contain {"success": "block deleted successfully"}.
-            If the deletion is not successful, it will contain the error message.
+        dict: Success message if the block is updated.
 
     Raises:
-
-        HTTPException: If the block name is invalid or the data is not found in the database.
+        HTTPException: If the block is not found (404).
     """
-    block_name = block_name.lower()
-    result = await connection.find_one({"name": block_name})
-    if not result:
-        raise HTTPException(
-            status_code=404, detail="Data not found in the database.")
-    await connection.delete_one({"name": block_name})
-    return {"message": "Block deleted successfully"}
+    return await UpdateBlock.execute(block_name, data)
+
+
+@app.delete("/{block_name}", response_model=dict, summary="Delete a specific block")
+@handle_exception
+async def delete_block(block_name: str) -> dict:
+    """
+    Deletes a specific block by its name.
+
+    Args:
+        block_name (str): The block to delete.
+
+    Returns:
+        dict: Success message if deletion is successful.
+
+    Raises:
+        HTTPException: If block is not found (404).
+    """
+    return await DeleteBlock.execute(block_name)
+
+
+@app.post("/", response_model=dict, summary="Create a new block")
+@handle_exception
+async def create_block(data: BlockModel) -> dict:
+    """
+    Creates a new block.
+
+    Args:
+        data (BlockModel): The data for the new block.
+
+    Returns:
+        dict: Success message with the ID of the newly created block.
+
+    Raises:
+        HTTPException: If a block with the same name already exists.
+    """
+    return await CreateBlock.execute(data) 
