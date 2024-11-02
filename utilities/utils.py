@@ -6,7 +6,7 @@ from functools import wraps
 url = "mongodb+srv://phanivutla2004:phaniphani@cluster0.gddku.mongodb.net/myFirstDatabase?retryWrites=true&w=majority&ssl=true"
 client = AsyncIOMotorClient(url, server_api=ServerApi("1"), connectTimeoutMS=50000)
 
-GITHUB_TOKEN = ""
+GITHUB_TOKEN = "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"
 REPO_OWNER = "Harshad712"
 REPO_NAME = "De-Lit-Testing"
 FOLDER_PATH = "test"
