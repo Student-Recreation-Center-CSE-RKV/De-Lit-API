@@ -64,7 +64,7 @@ async def get_banner():
 
 @app.put("/")
 @handle_exception
-async def update_banner(id : str,banner_image: UploadFile = File(...)):
+async def update_banner(banner_id : str,banner_image: UploadFile = File(...)):
     """
     Update an existing banner's image in the database.
 

@@ -180,7 +180,7 @@ class UpdatePublication():
         # Uploading the new cover_image into the github
         cover_image_content = await cover_image.read()
         cover_image_response = await upload_to_github(cover_image_content, cover_image.filename)
-
+        print(cover_image_response.status_code)
         if cover_image_response.status_code == 201:
             cover_image_url = cover_image_response.json().get("content", {}).get("html_url", "")
 

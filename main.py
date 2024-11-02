@@ -10,6 +10,7 @@ import routes.footer as footer
 import routes.login as login
 import routes.users as users
 from fastapi.middleware.cors import CORSMiddleware
+from utilities.middleware_utilities import JWTMiddleware
 
 app = FastAPI()
 
@@ -20,6 +21,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+#Adding custom middleware for JWTAuthentication
+app.add_middleware(JWTMiddleware)
 
 # routers
 app.include_router(home.app, prefix="/home",tags=["Home"])

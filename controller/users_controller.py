@@ -1,6 +1,6 @@
-from fastapi import HTTPException
+from fastapi import HTTPException,Request
 from models.users_model import User
-from utilities.login_utilities import login_db
+from utilities.login_utilities import login_db,pwd_context
 
 class CreateUser:
     """Handles user-related operations, including creation, deletion, and retrieval."""
@@ -35,7 +35,7 @@ class CreateUser:
         if await login_db.find_one({"username": username}):
             raise HTTPException(status_code=409, detail="Username already exists.")
         
-        user = User(username=username, password=password).model_dump()
+        user = User(username=username, password=pwd_context.hash(password)).model_dump()
         result = await login_db.insert_one(user)
         
         if result.inserted_id:
