@@ -102,7 +102,7 @@ class DeleteBlock:
 
 class CreateBlock:
     @staticmethod
-    async def execute(data: BlockModel) -> dict:
+    async def image_as_link(data: BlockModel) -> dict:
         """
         Inserts a new block into the database.
 
@@ -127,3 +127,6 @@ class CreateBlock:
         result = await connection.insert_one(new_block)
 
         return {"message": "Block created successfully", "block_id": str(result.inserted_id)}
+
+    async def image_as_file(data: BlockModel) -> dict:
+        return {"message": "Block created successfully"}
