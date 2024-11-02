@@ -1,6 +1,6 @@
-from fastapi import APIRouter, HTTPException, File, UploadFile
+from fastapi import APIRouter, File, UploadFile
 from utilities.utils import handle_exception
-from utilities.gtihub_utilities import upload_to_github
+from controller.file_upload_controller import UploadFileToGit
 
 app = APIRouter()
 
@@ -22,16 +22,4 @@ async def upload_file(file: UploadFile = File(...)):
 
         HTTPException: If there is an error while uploading the file.
     """
-
-    file_content = await file.read()
-
-    response = await upload_to_github(file_content, file.filename)
-
-    if response.status_code == 201:
-        file_url = response.json().get("content", {}).get("html_url", "")
-    else:
-        raise HTTPException(
-            status_code=400, detail=f"Error uploading file to GitHub. Response: {response.text}"
-        )
-
-    return {"message": "File uploaded successfully", "file_url": file_url}
+    return await UploadFileToGit.execute(file = file)

@@ -1,13 +1,19 @@
-from fastapi import APIRouter, HTTPException, Form
-from utilities.utils import client, handle_exception
-app = APIRouter()
+from fastapi import APIRouter, Form
+from utilities.utils import handle_exception
+from pydantic import BaseModel
+from controller.footer_controller import (
+    GetAllApplicationLinks,
+    GetApplicationLinkById,
+    UploadApplicationLink,
+    UpdateApplicationLink,
+    DeleteApplicationLink
+)
 
-mydb = client['Delit-test']
-footer_db = mydb.footer
+app = APIRouter()
 
 @app.get("/")
 @handle_exception
-async def links() :
+async def get_application_links() :
     """
     Summary:
     
@@ -19,25 +25,17 @@ async def links() :
 
     Returns:
     
-        list : list of dictionarys having data of links
+        list : list of dictionaries having data of links
     """    
-    links = []
-    async for link in footer_db.find() :
-        link["_id"] = str(link["_id"])
-        links.append(link)
-    if not links :
-        raise HTTPException(
-            status_code= 404, detail="There are no links available in this collection"
-        )
-    return links
+    return await GetAllApplicationLinks.execute()
 
-@app.get("/{app_name}") 
+@app.get("/{id}") 
 @handle_exception
-async def individual(app_name : str) :
+async def get_individual_link(id : str) :
     """
-    Summaru :
+    Summary :
     
-        Retrieving document for given application
+        Retrieving link for given application
     
     Args:
     
@@ -52,18 +50,8 @@ async def individual(app_name : str) :
     
         dictionary : document(app_link) of given application
     """    
-    
-    if app_name is None :
-        raise HTTPException(
-            status_code=422, detail="Provide sufficient data"
-        )
-    link = await footer_db.find_one({"app_name" : app_name})
-    if link is None:
-        raise HTTPException(
-            status_code=404, detail="There is no thing like that. Enter proper details"
-        )
-    link["_id"] = str(link["_id"])
-    return link
+    return await GetApplicationLinkById.execute(id = id)
+
 
 @app.put("/{app_name}")
 @handle_exception
@@ -88,22 +76,4 @@ async def update(app_name : str, app_link : str = Form(...)) :
     
         dictionary : return status(success) and message(Document is updated)
     """    
-    if app_name=="string" or app_link=="string" :
-        raise HTTPException(
-            status_code=422, detail="Provide sufficient detials")
-        
-    status = await footer_db.find_one({"app_name" : app_name})
-    if status is None :
-        raise HTTPException(
-            status_code=404, detail= f"No document is there for {app_name}")
-        
-    dictionary = {"app_link" : app_link}
-    result = await footer_db.update_one(
-        {"app_name" : app_name},
-        {"$set" : dictionary}
-    )
-    if result.modified_count :
-        return {"status" :"success", "message" : "link updated successfullyt"}
-    else :
-        raise HTTPException(
-            status_code=404, detail="Document not found or No changes made ")
+    return await UpdateApplicationLink.execute(app_name = app_name, app_link = app_link)
