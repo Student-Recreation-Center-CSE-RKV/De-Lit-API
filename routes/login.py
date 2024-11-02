@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Form, Depends
-from controller.login_controller import LoginController, RefreshTokenController
+from fastapi import APIRouter, Form, Depends,Request
+from controller.login_controller import LoginController, RefreshTokenController,LogoutController,protected_users
 from utilities.utils import handle_exception
-from fastapi.security import OAuth2PasswordBearer
+from utilities.login_utilities import OAuth2_scheme
 
 # Initialize router
 app = APIRouter()
-OAuth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+
 
 @app.post("/login", summary="Authenticate user and issue tokens")
 @handle_exception
@@ -18,8 +18,23 @@ async def login_for_token(username: str = Form(...), password: str = Form(...)) 
 
 @app.post("/refresh", summary="Refresh access token")
 @handle_exception
-async def refresh_access_token(refresh_token: str = Form(...)) -> dict:
+async def refresh_access_token(refresh_token: str = Depends(OAuth2_scheme)) -> dict:
     """
     API endpoint to refresh access token using a refresh token.
     """
     return await RefreshTokenController.refresh_access_token(refresh_token)
+
+@app.post("/logout",summary="Revokes the refresh token")
+@handle_exception
+async def logout(refresh_token : str = Depends(OAuth2_scheme)) -> dict :
+
+    """
+    API endpoint to revoke the refresh token
+    """
+    return await LogoutController.logout(refresh_token)
+
+
+@app.get("/protected",summary = "Protected routes only for admins")
+@handle_exception
+async def protected_routes(request:Request):
+    return await protected_users.protected_routes(request)

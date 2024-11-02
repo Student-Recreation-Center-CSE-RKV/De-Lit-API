@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Form
+from fastapi import APIRouter, Form,Request
 from controller.users_controller import GetAllUsers, CreateUser, DeleteUser
 from utilities.utils import handle_exception
 
@@ -30,3 +30,5 @@ async def all_users() -> list:
     API endpoint to retrieve all users in the database.
     """
     return await GetAllUsers.execute()
+
+
