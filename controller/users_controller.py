@@ -1,6 +1,6 @@
 from fastapi import HTTPException,Request
 from models.users_model import User
-from utilities.login_utilities import login_db,pwd_context
+from utilities.login_utilities import login_db,pwd_context,users_db
 
 class CreateUser:
     """Handles user-related operations, including creation, deletion, and retrieval."""
@@ -32,11 +32,11 @@ class CreateUser:
             raise HTTPException(status_code=422, detail="Please enter a username.")
         if not password:
             raise HTTPException(status_code=422, detail="Please enter a password.")
-        if await login_db.find_one({"username": username}):
+        if await users_db.find_one({"username": username}):
             raise HTTPException(status_code=409, detail="Username already exists.")
         
         user = User(username=username, password=pwd_context.hash(password)).model_dump()
-        result = await login_db.insert_one(user)
+        result = await users_db.insert_one(user)
         
         if result.inserted_id:
             return {"Message": "User Created Successfully"}
@@ -68,10 +68,10 @@ class DeleteUser:
         if not username:
             raise HTTPException(status_code=422, detail="Please enter a username.")
         
-        if not await login_db.find_one({"username": username}):
+        if not await users_db.find_one({"username": username}):
             raise HTTPException(status_code=404, detail="User not found.")
         
-        delete_result = await login_db.delete_one({"username": username})
+        delete_result = await users_db.delete_one({"username": username})
 
         if delete_result.deleted_count == 1:
             raise HTTPException(status_code=200, detail="User deleted successfully.")
@@ -97,7 +97,7 @@ class GetAllUsers:
             a "No users found" detail message.
         """
         users = []
-        async for user in login_db.find():
+        async for user in users_db.find():
             user["_id"] = str(user["_id"])
             users.append(user)
         

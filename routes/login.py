@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Form, Depends,Request
 from controller.login_controller import LoginController, RefreshTokenController,LogoutController,protected_users
 from utilities.utils import handle_exception
-from utilities.login_utilities import OAuth2_scheme
+from utilities.login_utilities import OAuth2_scheme,OAuth2PasswordRequestForm
+from models.users_model import User
 
 # Initialize router
 app = APIRouter()
@@ -9,11 +10,11 @@ app = APIRouter()
 
 @app.post("/login", summary="Authenticate user and issue tokens")
 @handle_exception
-async def login_for_token(username: str = Form(...), password: str = Form(...)) -> dict:
+async def login_for_token(user:OAuth2PasswordRequestForm = Depends()) -> dict:
     """
     API endpoint to authenticate user and issue JWT tokens.
     """
-    return await LoginController.login_for_token(username, password)
+    return await LoginController.login_for_token(user)
 
 
 @app.post("/refresh", summary="Refresh access token")

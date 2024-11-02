@@ -2,14 +2,14 @@ from fastapi import HTTPException,Depends,Request
 from models.users_model import User
 from models.login_model import refresh_token_request
 from models.users_model import User
-from utilities.login_utilities import create_access_token, create_refresh_token, verify_token, authenticate_user,save_refresh_token,is_token_revoked,revoke_refresh_token,pwd_context
+from utilities.login_utilities import create_access_token, create_refresh_token, verify_token, authenticate_user,save_refresh_token,is_token_revoked,revoke_refresh_token,pwd_context,OAuth2PasswordRequestForm,OAuth2_scheme
 
 
 class LoginController:
     """Handles user authentication and token generation."""
 
     @staticmethod
-    async def login_for_token(user:User) -> dict:
+    async def login_for_token(user :OAuth2PasswordRequestForm= Depends() ) -> dict:
         """
         Authenticates user credentials and generates access and refresh tokens and stores the refresh tokens into the database.
 
@@ -46,7 +46,7 @@ class RefreshTokenController:
     """Handles access token refresh using a valid refresh token."""
 
     @staticmethod
-    async def refresh_access_token(refresh_token: str) -> dict:
+    async def refresh_access_token(refresh_token: str = Depends(OAuth2_scheme)) -> dict:
         """
         Verifies refresh token and generates a new access token.
 
@@ -71,7 +71,7 @@ class RefreshTokenController:
 class LogoutController:
 
     @staticmethod
-    async def logout(refresh_token : str):
+    async def logout(refresh_token : str = Depends(OAuth2_scheme)):
         
         """
     Logs out the user by revoking the provided refresh token, preventing further use for obtaining new access tokens.
