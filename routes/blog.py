@@ -1,13 +1,15 @@
-from fastapi import APIRouter, HTTPException
-from bson import ObjectId
+from fastapi import APIRouter
 from utilities.utils import client, handle_exception
-import datetime
 from models.blog_model import blog, update
+from controller.blog_controller import (
+    GetAllBlogs,
+    GetBlogById,
+    UploadBlog,
+    UpdateBlog,
+    DeleteBlog
+)
 
 app = APIRouter(tags=['Blog'])
-mydb = client['Delit-test']
-blog_con = mydb.blog
-
 
 @app.post("/")
 @handle_exception
@@ -34,16 +36,7 @@ async def upload_blog(blog: blog) -> blog:
     Raises:
     - HTTPException: If there is an error while uploading the blog.
     """
-    blog = blog.model_dump()
-    blog["created_at"] = datetime.datetime.now()
-    result = await blog_con.insert_one(blog)
-    if result.inserted_id:
-        blog["_id"] = str(result.inserted_id)
-        return blog
-    else:
-        raise HTTPException(
-            status_code=400, detail=f"Can't upload the data into Database")
-
+    return await UploadBlog.execute(blog = blog)
 
 @app.get("/")
 @handle_exception
@@ -58,15 +51,7 @@ async def get_blogs():
     - HTTPException: If there is an error while fetching the blogs.
     """
 
-    blogs = []
-    async for blog in blog_con.find().sort("created_at", -1):
-        blog["_id"] = str(blog["_id"])
-        blogs.append(blog)
-    if not blogs:
-        raise HTTPException(
-            status_code=404, detail="No blogs found. Please upload blogs before fetching.")
-    return blogs
-
+    return await GetAllBlogs.execute()
 
 @app.get("/{id}")
 @handle_exception
@@ -83,14 +68,7 @@ async def get_blog(id: str):
     Raises:
     - HTTPException: one if the id is invalid or The blog is not found.
     """
-    if not ObjectId.is_valid(id):
-        raise HTTPException(status_code=404, detail="Invalid blog ID format")
-    _blog = await blog_con.find_one({"_id": ObjectId(id)})
-    if _blog is None:
-        raise HTTPException(status_code=404, detail="Blog not found")
-
-    _blog["_id"] = str(_blog["_id"])
-    return _blog
+    return await GetBlogById.execute(id = id)
 
 
 @app.put("/{id}")
@@ -111,28 +89,7 @@ async def update_blog(id: str, update_data: update):
     Raises:
     - HTTPException: If the id is invalid, the blog is not found, or no data is provided for update.
     """
-    try:
-        if not ObjectId.is_valid(id):
-            raise {"error": "Invalid ID format"}
-
-        update_data = {k: v for k, v in update_data.dict().items()
-                       if v is not None}
-
-        if not update_data:
-            raise {"error": "No data provided for update"}
-        result = await blog_con.update_one(
-            {"_id": ObjectId(id)},
-            {"$set": update_data}
-        )
-        if result.modified_count == 0:
-            raise
-            return {"error": "No blog found with the given ID or no changes made"}
-
-        raise HTTPException(
-            status_code=200, detail="Blog updated successfully")
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"An unknown error occurred: {str(e)}")
+    return await UpdateBlog.execute(id = id , update_data = update_data)
 
 
 @app.delete("/{blog_id}")
@@ -152,16 +109,4 @@ async def remove_blog(blog_id: str):
     Raises:
     - HTTPException: If the id is invalid, the blog is not found, or the deletion is not successful.
     """
-
-    if not ObjectId.is_valid(blog_id):
-        raise HTTPException(status_code=404, detail="Invalid blog ID format")
-    blog = await blog_con.find_one({"_id": ObjectId(blog_id)})
-    if not blog:
-        raise HTTPException(status_code=404, detail="blog not found")
-    delete_result = await blog_con.delete_one({"_id": ObjectId(blog_id)})
-    if delete_result.deleted_count == 1:
-        raise HTTPException(status_code=200,
-                            detail=f"blog with id {blog_id} is successfully deleted")
-    else:
-        raise HTTPException(
-            status_code=500, detail="Failed to delete the blog")
+    return await DeleteBlog.execute(blog_id = blog_id)
