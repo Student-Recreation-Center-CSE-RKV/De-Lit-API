@@ -5,12 +5,13 @@ from models.users_model import User
 from models.login_model import token_revocation
 from utilities.utils import client
 from passlib.context import CryptContext
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer,OAuth2PasswordRequestForm
 
 my_db = client['Delit-test']
 login_db = my_db.logins
+users_db = my_db.users
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-OAuth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+OAuth2_scheme = OAuth2PasswordBearer(tokenUrl="/login/login")
 
 SECRET_KEY = "DelitTest02606712"
 ALGORITHM = "HS256"
@@ -110,7 +111,7 @@ async def authenticate_user(username : str , password : str):
                       if authentication is successful, or None if
                       the username is not found or the password is incorrect.
     """
-    user = await login_db.find_one({"username":username})
+    user = await users_db.find_one({"username":username})
     if not user :
         raise HTTPException(
             status_code = 404,

@@ -34,7 +34,7 @@ class JWTMiddleware(BaseHTTPMiddleware):
                            or the token is invalid/expired.
             HTTPException: Raises 401 if the authorization header is missing.
         """
-        public_routes = ["/login/"]
+        public_routes = ["/login/protected"]
 
         if request.url.path not in public_routes:
             response = await call_next(request)
