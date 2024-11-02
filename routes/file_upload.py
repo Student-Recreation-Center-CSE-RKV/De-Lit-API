@@ -31,7 +31,7 @@ async def upload_file(file: UploadFile = File(...)):
         file_url = response.json().get("content", {}).get("html_url", "")
     else:
         raise HTTPException(
-            status_code=400, detail="Error uploading file to GitHub"
+            status_code=400, detail=f"Error uploading file to GitHub. Response: {response.text}"
         )
 
     return {"message": "File uploaded successfully", "file_url": file_url}

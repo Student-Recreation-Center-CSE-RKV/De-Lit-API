@@ -6,11 +6,10 @@ from functools import wraps
 url = "mongodb+srv://phanivutla2004:phaniphani@cluster0.gddku.mongodb.net/myFirstDatabase?retryWrites=true&w=majority&ssl=true"
 client = AsyncIOMotorClient(url, server_api=ServerApi("1"), connectTimeoutMS=50000)
 
-GITHUB_TOKEN = ""
-REPO_OWNER = "Harshad712"
-REPO_NAME = "De-Lit-Testing"
-FOLDER_PATH = "test"
-
+GITHUB_TOKEN = "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"
+REPO_OWNER = "N-Harsha-Vardhan-Dev"
+REPO_NAME = "gallery"
+FOLDER_PATH = "images"
 
 def handle_exception(function):
     @wraps(function)
