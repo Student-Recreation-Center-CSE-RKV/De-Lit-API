@@ -2,15 +2,14 @@ from fastapi import APIRouter, File, UploadFile, Form
 from utilities.utils import client, handle_exception
 from controller.banner_controller import (
     GetBanner,
-    UploadBanner,
-    UpdateBanner
+    UploadBanner
 )
 
 app = APIRouter(tags=['Banner'])
 mydb = client['Delit-test']
 banner_db = mydb.Banners
 
-@app.post("/")
+@app.put("/new_function")
 @handle_exception
 async def upload_banner(banner_id : str = Form(...),banner_image : UploadFile = File(...) ):
     """
@@ -61,38 +60,3 @@ async def get_banner():
     """
     return await GetBanner.execute()
 
-
-@app.put("/")
-@handle_exception
-async def update_banner(banner_id : str,banner_image: UploadFile = File(...)):
-    """
-    Update an existing banner's image in the database.
-
-    This function updates a banner's image by first validating the banner ID, deleting the existing banner image from GitHub,
-    
-    uploading the new image, and updating the image link in the MongoDB database.
-
-    Args:
-    
-        id (str): The ID of the banner to update. Must be a valid MongoDB ObjectId string.
-    
-        banner_image (UploadFile): The new banner image file to upload and link to the banner.
-
-    Returns:
-    
-        HTTPException: Raises a 201 status code exception upon successful update with a message indicating success.
-
-    Raises:
-    
-        HTTPException: If the `id` is invalid or improperly formatted.
-    
-        HTTPException: If no banner is found with the given ID.
-    
-        HTTPException: If there is a conflict or error when deleting the current banner image from GitHub.
-    
-        HTTPException: If there is an error uploading the new banner image to GitHub.
-    
-        HTTPException: If the database update for the banner image link fails.
-    """
-    
-    return await UpdateBanner.execute(id = id , banner_image = banner_image)

@@ -41,30 +41,41 @@ class UploadBanner() :
     @staticmethod
     async def execute(banner_id : str = Form(...),banner_image : UploadFile = File(...) ) :
         """
-        Upload a new banner image to GitHub and store the banner details in the database.
+    Upload a new banner image to GitHub and store the banner details in the database.
 
-        This function takes a `banner_id` and an image file, uploads the image to GitHub,
-        
-        retrieves the image URL, and stores the banner details, including the URL, in the database.
-        
-        Args:
-        
-            banner_id (str): The unique identifier for the banner.
-        
-            banner_image (UploadFile): The image file for the banner to be uploaded.
+    This function takes a unique `banner_id` and an image file, uploads the image to GitHub,
+    retrieves the image URL, and stores the banner details, including the URL, in the database.
 
-        Returns:
-        
-            dict: A dictionary containing a success message and the newly created banner's `_id`.
-        
-                For example: {"Message": "Banner Uploaded Successfully", "_id": "<banner_id>"}.
+    Args:
+        banner_id (str): The unique identifier for the banner.
+        banner_image (UploadFile): The image file for the banner to be uploaded.
 
-        Raises:
-        
-            HTTPException: If there is an error uploading the banner image to GitHub.
-            
-            HTTPException: If there is an error inserting the banner data into the database.
-        """
+    Returns:
+        dict: A dictionary containing a success message and the newly created banner's `_id`.
+              For example: {"Message": "Banner Uploaded Successfully", "_id": "<banner_id>"}.
+
+    Raises:
+        HTTPException: 
+            - If the banner already exists and the current banner link is missing (404).
+            - If there is a conflict while trying to delete the old banner image from GitHub (409).
+            - If there is an error while uploading the new banner image to GitHub (400).
+            - If there is an error while inserting or updating the banner data into the database (400).
+    """
+        banner_exists = await banner_db.find_one({"banner_id":banner_id})
+        if banner_exists is not None :
+            if "banner_link" not in banner_exists or not banner_exists["banner_link"]:
+                raise HTTPException(
+                    status_code=404,
+                    detail = "banner link is missing."
+                )
+            #Deleting the old banner_image form the github
+            banner_delete = await delete_file_from_github(banner_exists["banner_link"])
+
+            if banner_delete.status_code !=200 :
+                 raise HTTPException(
+                status_code = 409,
+                detail = "Conflict : Unalbe to upload the banner"
+                 )
 
         banner = Banner_model(banner_id = banner_id)
         banner = banner.model_dump()
@@ -78,13 +89,18 @@ class UploadBanner() :
                 status_code= 400,
                 detail= "Error While Uploading into github"
             )
-        banner["banner_link"] = banner_url
-        result = await banner_db.insert_one(banner)
-        if result.inserted_id :
-            banner["_id"] = str(result.inserted_id)
+        result = await banner_db.update_one({"banner_id":banner_id},
+                                            {"$set":{"banner_link":banner_url}},upsert=True)
+        if result.modified_count == 1 :
             return {
-                "Message":"Banner Uploaded Successfully",
-                "_id" : str(result.inserted_id)
+                "Message":"Banner Updated Successfully",
+               
+            }
+        elif result.upserted_id :
+            banner["_id"] = str(result.upserted_id)
+            return {
+                "message":"New Banner Created Successfully",
+                "_id":str(result.upserted_id)
             }
         else :
             raise HTTPException(
@@ -92,78 +108,3 @@ class UploadBanner() :
                 detail = "Error While Uploading into Database"
             )
 
-class UpdateBanner() :
-    @staticmethod
-    async def execute(id : str,banner_image: UploadFile = File(...)):
-        """
-        Update an existing banner's image in the database.
-
-        This function updates a banner's image by first validating the banner ID, deleting the existing banner image from GitHub,
-        
-        uploading the new image, and updating the image link in the MongoDB database.
-
-        Args:
-        
-            id (str): The ID of the banner to update. Must be a valid MongoDB ObjectId string.
-        
-            banner_image (UploadFile): The new banner image file to upload and link to the banner.
-
-        Returns:
-        
-            HTTPException: Raises a 201 status code exception upon successful update with a message indicating success.
-
-        Raises:
-        
-            HTTPException: If the `id` is invalid or improperly formatted.
-        
-            HTTPException: If no banner is found with the given ID.
-        
-            HTTPException: If there is a conflict or error when deleting the current banner image from GitHub.
-        
-            HTTPException: If there is an error uploading the new banner image to GitHub.
-        
-            HTTPException: If the database update for the banner image link fails.
-        """
-        if not ObjectId.is_valid(id):
-            raise HTTPException(status_code = 404,
-                                detail = "Invalid Id Format.")
-        
-        banner = await banner_db.find_one({"_id":ObjectId(id)})
-
-        if not banner :
-            raise HTTPException(status_code = 404 , detail = "Banner not found with the given id.")
-        
-        #Deleting the old banner_image form the github
-        banner_delete = await delete_file_from_github(banner["banner_link"])
-
-        if banner_delete.status_code !=200 :
-            raise HTTPException(
-                status_code = 409,
-                detail = "Conflict : Unalbe to upload the banner"
-            )
-
-        #uploading the new banner_image  into github
-        banner_content = await banner_image.read()
-
-        banner_response  = await upload_to_github(banner_content,banner_image.filename)
-
-        if banner_response.status_code == 201:
-            banner_url = banner_response.json().get("content", {}).get("html_url", "")
-        else :
-            raise HTTPException(
-                status_code=400, detail="Error Uploading file into github"
-            )
-
-        banner_update = await banner_db.update_one(
-            {"_id":ObjectId(id)},
-            {"$set":{"banner_link":banner_url}}
-        )
-        if banner_update.modified_count == 0:
-            raise HTTPException(
-                status_code = 400,
-                detail = "banner_image isn't changed"
-            )
-        raise HTTPException(
-            status_code = 201,
-            detail = "banner_image updated successfully"
-        )
